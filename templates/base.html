@@ -45,12 +45,29 @@
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
             data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only">Navigation umschalten</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Meine TODOs</a>
+          <a class="navbar-brand" href="/">Meine TODOs</a>
+        </div>
+
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+
+            {% if current_user.is_authenticated %}
+
+              <li><a href="#">Hallo, {{ current_user.username }}</a></li>
+              <li><a href="{{ url_for('logout') }}">Logout</a></li>
+
+            {% else %}
+
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+              <li><a href="{{ url_for('register') }}">Registrieren</a></li>
+
+            {% endif %}
+          </ul>
         </div>
       </div>
     </nav>
