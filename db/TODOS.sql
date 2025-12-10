@@ -1,4 +1,4 @@
-CREATE TABLE users (
+"""CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(250) NOT NULL UNIQUE,
     password VARCHAR(250) NOT NULL
@@ -11,7 +11,7 @@ CREATE TABLE todos (
     due DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
+"""
 Create Table Equip (
     item_name varchar(100) Primary Key,
     dmgtype varchar(100),
