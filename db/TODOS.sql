@@ -23,7 +23,8 @@ Create Table Equip (
     crit_dmg_conditions varchar(100),
     attributes varchar(100),
     item_effect varchar(100),
-    item_cooldown int(1000)
+    item_cooldown int(1000),
+    FOREIGN KEY (username) REFERENCES Player(username)
 );
 
 create Table Enemies (
@@ -48,7 +49,9 @@ create Table Biomes (
 create Table Player (
     username varchar(100) Primary Key,
     status_effects varchar(100),
-    cosmetics varchar(100)
+    cosmetics varchar(100),
+    FOREIGN KEY (skin_name) REFERENCES Cosmetics(Skin_name),
+    FOREIGN KEY (biome_name) REFERENCES Biomes(biome_name)
 );
 
 create Table Player_mutations (
