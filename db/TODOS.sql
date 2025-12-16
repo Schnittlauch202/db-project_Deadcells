@@ -96,14 +96,14 @@ CREATE TABLE Enemy_Biome (
 );
 
 --insert sample data 
-Insert Into Equip(item_name, dmgtype, dmgnumber, item_grade, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item-cooldown) Values
-(),
-(),
-();
+Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item-cooldown) Values
+(Twin Daggers, Melee Weapon, 173, the Twin Daggers are a sword-type melee weapon which deal a critical hit on the third strike of each combo, 1.07, close quarters, Always deals a high-damage critical hit on the third hit of each combo, , Increases your movement speed for 5 seconds after a critical hit, ,),
+(BroadSword, Melee Weapon, 176, The Broadsword is a heavy melee weapon which swings slowly, but deals critical damage during subsequent attacks in its combo, 2.25, close quarters and third hit has slightly longer range than the previous two, The second and third hits will always deal a critical hit, , if legendary grade grants a shield upon killing an enemy, ,),
+(Laser Glaive, ranged weaponm, 70, The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies, 1.2, deals crit damage after two bounces, , The projectile can bounce up to 6 times and Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%, 0.8);
 
-Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect, dmg_number) Values
-(),
-(),
+Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect, dmg_number, moveset) Values
+(Scorpion, 100, , phisical, poison, , Tail swipe and venom shot),
+(The Concierge, ),
 ();
 
 Insert Into Biomes(biome_name, biome_info, biome_status_effect, biome_map, biome_requirements, biome_gimmick) Values
