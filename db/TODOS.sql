@@ -121,11 +121,11 @@ Insert Into Player_mutations(name, mutation_effect, cost, mutation_type) Values
 ('What doesnt kill me', 'recover 2% of max HP', 'parrying a melee attack', 'survival');
 
 Insert Into Status_effects(effect_name, effect_info) Values
-(),
-(),
-();
+('Bleed', 'Bleed effects cause enemies to take large amounts of damage over the course of their duration. If 5 bleed effects are inflicted upon an enemy, all of the damage they would have inflicted over the course of their duration is dealt all at once in a sudden burst of blood. Enemies that are bleeding will be visibly squirting blood.'),
+('Slow', 'Slow reduces enemy movement and attack speed to around half of what it would normally be, making enemies easier to engage as they will not be able to attack as quickly.'),
+('Damage Resistance', 'Damage resistance reduces the damage of incoming hits by a percentage. It is most commonly used by the player, as multiple skills, affixes, and mutations will grant this buff to the player.');
 
 Insert Into Cosmetics(skin_name, skin_description, unlock_condition) Values
-(),
-(),
-();
+('Cultist Outfit', 'Do you have a minute to talk about our Lord and Saviour?', 'Drops from any of the corpses scattered inside the large floating islands of Fractured Shrines; can be instantly equipped with the Homunculus Rune'),
+('Flawless Concierge Outfit', 'Garb sported by the lowliest of achievers...', 'Defeat the Concierge without taking damage'),
+('Golden Outfit', 'You definitely wont go unnoticed wearing this.', 'Specialist Shop in the Prisoners Quarters; costs 10,000 gold or a 50-kill curse');
