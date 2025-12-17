@@ -48,7 +48,6 @@ create Table Enemies (
 
 create Table Biomes (
     biome_name varchar(100) Primary Key,
-    biome_info varchar(100) Not Null,
     biome_status_effect varchar(100),
     biome_map varchar(100) Not Null,
     biome_requirements varchar(100) Not Null,
@@ -102,12 +101,12 @@ Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit
 ('Laser Glaive', 'ranged weapon', 70, 'The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies', 1.2, 'deals crit damage after two bounces', , 'The projectile can bounce up to 6 times, Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%', 0.8);
 
 Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect, dmg_number, moveset) Values
-(Scorpion, 100, , phisical, poison, , Tail swipe and venom shot),
-(The Concierge, ),
-();
+('Scorpion', 100, , 'melee, projectile', 'poison', , 'Tail swipe, venom shot'),
+('The Concierge', 4000, , 'ranged, AOE, melee', 'stun with "shout" attack', , 'attack: stab, firestrike, leap,defence: shout, Aura of laceration'),
+('Ground Shaker', 300, 'immune to stun, cannot be harmed from the back', 'melee, ranged, AOE', 'ranged and AOE cannot be parried or dodge rolled', , 'Avalanche, swipe combo, ');
 
-Insert Into Biomes(biome_name, biome_info, biome_status_effect, biome_map, biome_requirements, biome_gimmick) Values
-(),
+Insert Into Biomes(biome_name, biome_status_effect, biome_map, biome_requirements, biome_gimmick) Values
+('Prisoners Quarters', '', ),
 (),
 ();
 
