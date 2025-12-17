@@ -19,6 +19,7 @@ Create Table Equip (
     attributes varchar(100),
     item_effect varchar(100),
     item_cooldown int(1000),
+    username varchar(100) Not Null 
     FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and equipment -> add foreign key in n Table
 );
 
@@ -42,6 +43,8 @@ create Table Player (
     username varchar(100) Primary Key,
     status_effects varchar(100),
     cosmetics varchar(100),
+    skin_name varchar(100) Not Null,
+    biome_name varchar(100) Not Null, 
     FOREIGN KEY (skin_name) REFERENCES Cosmetics(Skin_name),
     FOREIGN KEY (biome_name) REFERENCES Biomes(biome_name)
 );
@@ -51,12 +54,14 @@ create Table Player_mutations (
     mutation_effect varchar(100),
     cost int(100),
     mutation_type varchar(100),
+    username varchar(100) Not Null, 
     FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and player_mutation -> add foreign key in n Table
 );
 
 create Table Status_effects (
     effect_name varchar(100) Primary Key,
     effect_info varchar(100),
+    username varchar(100) Not Null, 
     FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and status_effects -> add foreign key in n Table
 );
 
@@ -98,7 +103,6 @@ Insert Into Player(username, cosmetics) Values
 (, 'Cultist Outfit'), 
 (, 'Festive Outfit'),
 (, 'Galaxy Outfit');
-
 
 Insert Into Player_mutations(name, mutation_effect, cost, mutation_type) Values
 ('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality'),
