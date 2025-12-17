@@ -49,7 +49,6 @@ create Table Enemies (
 create Table Biomes (
     biome_name varchar(100) Primary Key,
     biome_status_effect varchar(100),
-    biome_map varchar(100) Not Null,
     biome_requirements varchar(100) Not Null,
     biome_gimmick varchar(100)
 );
@@ -105,20 +104,21 @@ Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect,
 ('The Concierge', 4000, , 'ranged, AOE, melee', 'stun with "shout" attack', , 'attack: stab, firestrike, leap,defence: shout, Aura of laceration'),
 ('Ground Shaker', 300, 'immune to stun, cannot be harmed from the back', 'melee, ranged, AOE', 'ranged and AOE cannot be parried or dodge rolled', , 'Avalanche, swipe combo, ');
 
-Insert Into Biomes(biome_name, biome_status_effect, biome_map, biome_requirements, biome_gimmick) Values
-('Prisoners Quarters', '', ),
-(),
-();
+Insert Into Biomes(biome_name, biome_status_effect, biome_requirements, biome_gimmick) Values
+('Prisoners Quarters', 'none', 'none', 'none'),
+('Forgotten Sepulcher', 'darkness', 'teleportation runem', 'spikes'),
+('Undying Shores', 'none', 'cultist outfit', 'none');
 
-Insert Into Player(username, status_effects, cosmetics) Values
-(),
-(),
-();
+Insert Into Player(username, cosmetics) Values
+(, 'Cultist Outfit'), 
+(, 'Festive Outfit'),
+(, 'Galaxy Outfit');
+
 
 Insert Into Player_mutations(name, mutation_effect, cost, mutation_type) Values
-(),
-(),
-();
+('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality'),
+('Point Blank', 'attacks inflicts +30% bonus damage', 'close-ranged attack with ranged weapon', 'tactics'),
+('What doesnt kill me', 'recover 2% of max HP', 'parrying a melee attack', 'survival');
 
 Insert Into Status_effects(effect_name, effect_info) Values
 (),
