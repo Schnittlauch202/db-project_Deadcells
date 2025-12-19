@@ -84,15 +84,15 @@ CREATE TABLE Enemy_Biome (
 );
 
 --insert sample data 
-Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item-cooldown) Values
-('Twin Daggers', 'Melee Weapon', 173, 'the Twin Daggers are a sword-type melee weapon which deal a critical hit on the third strike of each combo', 1.07, 'close quarters', 'Always deals a high-damage critical hit on the third hit of each combo', , 'Increases your movement speed for 5 seconds after a critical hit', ,),
-('BroadSword', 'Melee Weapon', 176, 'The Broadsword is a heavy melee weapon which swings slowly, but deals critical damage during subsequent attacks in its combo', 2.25, 'close quarters, third hit has slightly longer range than the previous two', 'The second and third hits will always deal a critical hit', , 'if legendary grade grants a shield upon killing an enemy', ,),
-('Laser Glaive', 'ranged weapon', 70, 'The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies', 1.2, 'deals crit damage after two bounces', , 'The projectile can bounce up to 6 times, Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%', 0.8);
+Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item-cooldown, username) Values
+('Twin Daggers', 'Melee Weapon', 173, 'the Twin Daggers are a sword-type melee weapon which deal a critical hit on the third strike of each combo', 1.07, 'close quarters', 'Always deals a high-damage critical hit on the third hit of each combo', NULL, 'Increases your movement speed for 5 seconds after a critical hit',NULL,'Dave'),
+('BroadSword', 'Melee Weapon', 176, 'The Broadsword is a heavy melee weapon which swings slowly, but deals critical damage during subsequent attacks in its combo', 2.25, 'close quarters, third hit has slightly longer range than the previous two', 'The second and third hits will always deal a critical hit', NULL, 'if legendary grade grants a shield upon killing an enemy', NULL, 'larry'),
+('Laser Glaive', 'ranged weapon', 70, 'The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies', 1.2, 'deals crit damage after two bounces',NULL , 'The projectile can bounce up to 6 times, Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%', 0.8, 'Garry');
 
 Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect, dmg_number, moveset) Values
-('Scorpion', 100, , 'melee, projectile', 'poison', , 'Tail swipe, venom shot'),
-('The Concierge', 4000, , 'ranged, AOE, melee', 'stun with "shout" attack', , 'attack: stab, firestrike, leap,defence: shout, Aura of laceration'),
-('Ground Shaker', 300, 'immune to stun, cannot be harmed from the back', 'melee, ranged, AOE', 'ranged and AOE cannot be parried or dodge rolled', , 'Avalanche, swipe combo, ');
+('Scorpion', 100, NULL, 'melee, projectile', 'poison', NULL, 'Tail swipe, venom shot'),
+('The Concierge', 4000, NULL, 'ranged, AOE, melee', 'stun with "shout" attack', NULL, 'attack: stab, firestrike, leap,defence: shout, Aura of laceration'),
+('Ground Shaker', 300, 'immune to stun, cannot be harmed from the back', 'melee, ranged, AOE', 'ranged and AOE cannot be parried or dodge rolled',NULL, 'Avalanche, swipe combo');
 
 Insert Into Biomes(biome_name, biome_status_effect, biome_requirements, biome_gimmick) Values
 ('Prisoners Quarters', 'none', 'none', 'none'),
@@ -100,9 +100,9 @@ Insert Into Biomes(biome_name, biome_status_effect, biome_requirements, biome_gi
 ('Undying Shores', 'none', 'cultist outfit', 'none');
 
 Insert Into Player(username, cosmetics) Values
-(, 'Cultist Outfit'), 
-(, 'Festive Outfit'),
-(, 'Galaxy Outfit');
+('Dave', 'Cultist Outfit'), 
+('Garry', 'Festive Outfit'),
+('Larry', 'Galaxy Outfit');
 
 Insert Into Player_mutations(name, mutation_effect, cost, mutation_type) Values
 ('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality'),
