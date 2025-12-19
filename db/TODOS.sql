@@ -10,7 +10,7 @@ Drop Table Enemy_Biome;
 Create Table Equip (
     item_name varchar(100) Primary Key Not Null,
     dmgtype varchar(100) Not Null,
-    dmgnumber int(255) Not Null,
+    dps int(255) Not null,
     item_grade varchar(100) Not Null,
     item_info varchar(100) Not Null,
     atk_speed int(255) Not Null,
@@ -29,7 +29,8 @@ create Table Enemies (
     enemy_resist varchar(100),
     dmg_type varchar(100) Not Null,
     dmg_effect varchar(100),
-    dmg_number int(255) Not Null
+    dmg_number int(255),
+  	moveset varchar(100) not null
 );
 
 create Table Biomes (
