@@ -10,26 +10,26 @@ Drop Table Enemy_Biome;
 Create Table Equip (
     item_name varchar(100) Primary Key Not Null,
     dmgtype varchar(100) Not Null,
-    dmgnumber int(100000) Not Null,
+    dmgnumber int(255) Not Null,
     item_grade varchar(100) Not Null,
     item_info varchar(100) Not Null,
-    atk_speed int(1000) Not Null,
-    atk_range int(1000) Not Null,
+    atk_speed int(255) Not Null,
+    atk_range int(255) Not Null,
     crit_dmg_conditions varchar(100),
     attributes varchar(100),
     item_effect varchar(100),
-    item_cooldown int(1000),
+    item_cooldown int(255),
     username varchar(100) Not Null 
-    FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and equipment -> add foreign key in n Table
+    FOREIGN KEY (username) REFERENCES Player(username)
 );
 
 create Table Enemies (
     enemy_name varchar(100) Primary Key,
-    enemyhealth int(1000000) Not Null,
+    enemyhealth int(255) Not Null,
     enemy_resist varchar(100),
     dmg_type varchar(100) Not Null,
     dmg_effect varchar(100),
-    dmg_number int(10000) Not Null
+    dmg_number int(255) Not Null
 );
 
 create Table Biomes (
@@ -55,39 +55,39 @@ create Table Player_mutations (
     cost int(100),
     mutation_type varchar(100),
     username varchar(100) Not Null, 
-    FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and player_mutation -> add foreign key in n Table
+    FOREIGN KEY (username) REFERENCES Player(username)
 );
 
 create Table Status_effects (
     effect_name varchar(100) Primary Key,
     effect_info varchar(100),
     username varchar(100) Not Null, 
-    FOREIGN KEY (username) REFERENCES Player(username) --1:n relation between player and status_effects -> add foreign key in n Table
+    FOREIGN KEY (username) REFERENCES Player(username)
 );
 
 create Table Cosmetics (
     skin_name varchar(100) Primary Key,
     skin_description varchar(100),
-    unlock_condition varchar(100)
+    unlock_condition varchar(255)
 );
 
 CREATE TABLE Enemy_Biome (
     enemy_name VARCHAR(100),
     biome_name VARCHAR(100),
-    PRIMARY KEY (enemy_name, biome_name), -- Composite primary key to prevent duplicates
-    FOREIGN KEY (enemy_name) REFERENCES Enemies(enemy_name)-- Foreign keys to maintain referential integrity
-        ON DELETE CASCADE --Causes table to automatically update or delete if the original tables get changed
+    PRIMARY KEY (enemy_name, biome_name),
+    FOREIGN KEY (enemy_name) REFERENCES Enemies(enemy_name)
+        ON DELETE CASCADE 
         ON UPDATE CASCADE,
     FOREIGN KEY (biome_name) REFERENCES Biomes(biome_name)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
---insert sample data 
-Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item-cooldown, username) Values
-('Twin Daggers', 'Melee Weapon', 173, 'the Twin Daggers are a sword-type melee weapon which deal a critical hit on the third strike of each combo', 1.07, 'close quarters', 'Always deals a high-damage critical hit on the third hit of each combo', NULL, 'Increases your movement speed for 5 seconds after a critical hit',NULL,'Dave'),
-('BroadSword', 'Melee Weapon', 176, 'The Broadsword is a heavy melee weapon which swings slowly, but deals critical damage during subsequent attacks in its combo', 2.25, 'close quarters, third hit has slightly longer range than the previous two', 'The second and third hits will always deal a critical hit', NULL, 'if legendary grade grants a shield upon killing an enemy', NULL, 'larry'),
-('Laser Glaive', 'ranged weapon', 70, 'The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies', 1.2, 'deals crit damage after two bounces',NULL , 'The projectile can bounce up to 6 times, Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%', 0.8, 'Garry');
+
+Insert Into Equip(item_name, dmgtype, dps, item_info, atk_speed, atk_range, crit_dmg_conditions, attributes, item_effect, item_cooldown, username) Values
+('Twin Daggers','Melee Weapon',173,'the Twin Daggers are a sword-type melee weapon which deal a critical hit on the third strike of each combo',1.07,'close quarters','Always deals a high-damage critical hit on the third hit of each combo',NULL,'Increases your movement speed for 5 seconds after a critical hit',NULL,'Dave'),
+('BroadSword','Melee Weapon',176,'The Broadsword is a heavy melee weapon which swings slowly, but deals critical damage during subsequent attacks in its combo',2.25,'close quarters,third hit has slightly longer range than the previous two','The second and third hits will always deal a critical hit',NULL,'if legendary grade grants a shield upon killing an enemy', NULL,'larry'),
+('Laser Glaive','ranged weapon',70,'The Laser Glaive is a ranged weapon that is focused on dealing with multiple enemies',1.2,'deals crit damage after two bounces',NULL,'The projectile can bounce up to 6 times, Each additional hit after the first crit increases the projectile speed by 10% and its damage by 25%',0.8,'Garry');
 
 Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect, dmg_number, moveset) Values
 ('Scorpion', 100, NULL, 'melee, projectile', 'poison', NULL, 'Tail swipe, venom shot'),
