@@ -7,7 +7,6 @@ Drop Table Status_effects;
 Drop Table Cosmetics;
 Drop Table Enemy_Biome; 
 
---when insert is too long to define with Varchar -> use Text
 
 create Table Cosmetics (
     skin_name varchar(100) Primary Key,
