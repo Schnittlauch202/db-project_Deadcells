@@ -121,3 +121,5 @@ Insert Into Status_effects(effect_name, effect_info, username) Values
 ('Bleed', 'Bleed effects cause enemies to take large amounts of damage over the course of their duration. If 5 bleed effects are inflicted upon an enemy, all of the damage they would have inflicted over the course of their duration is dealt all at once in a sudden burst of blood. Enemies that are bleeding will be visibly squirting blood.','Garry'),
 ('Slow', 'Slow reduces enemy movement and attack speed to around half of what it would normally be, making enemies easier to engage as they will not be able to attack as quickly.','Larry'),
 ('Damage Resistance', 'Damage resistance reduces the damage of incoming hits by a percentage. It is most commonly used by the player, as multiple skills, affixes, and mutations will grant this buff to the player.','Dave');
+
+Insert Into () Values
