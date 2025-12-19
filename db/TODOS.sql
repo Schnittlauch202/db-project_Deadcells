@@ -7,30 +7,10 @@ Drop Table Status_effects;
 Drop Table Cosmetics;
 Drop Table Enemy_Biome; 
 
-Create Table Equip (
-    item_name varchar(100) Primary Key Not Null,
-    dmgtype varchar(100) Not Null,
-    dps int(255) Not null,
-    item_grade varchar(100) Not Null,
-    item_info varchar(100) Not Null,
-    atk_speed int(255) Not Null,
-    atk_range int(255) Not Null,
-    crit_dmg_conditions varchar(100),
-    attributes varchar(100),
-    item_effect varchar(100),
-    item_cooldown int(255),
-    username varchar(100) Not Null 
-    FOREIGN KEY (username) REFERENCES Player(username)
-);
-
-create Table Enemies (
-    enemy_name varchar(100) Primary Key,
-    enemyhealth int(255) Not Null,
-    enemy_resist varchar(100),
-    dmg_type varchar(100) Not Null,
-    dmg_effect varchar(100),
-    dmg_number int(255),
-  	moveset varchar(100) not null
+create Table Cosmetics (
+    skin_name varchar(100) Primary Key,
+    skin_description varchar(100),
+    unlock_condition varchar(255)
 );
 
 create Table Biomes (
@@ -50,10 +30,37 @@ create Table Player (
     FOREIGN KEY (biome_name) REFERENCES Biomes(biome_name)
 );
 
+Create Table Equip (
+    item_name varchar(100) Primary Key Not Null,
+    dmgtype varchar(100) Not Null,
+    dps int(255) Not null,
+    item_grade varchar(100) Not Null,
+    item_info varchar(100) Not Null,
+    atk_speed int(255) Not Null,
+    atk_range int(255) Not Null,
+    crit_dmg_conditions varchar(100),
+    attributes varchar(100),
+    item_effect varchar(100),
+    item_cooldown int(255),
+    username varchar(100) Not Null,
+    FOREIGN KEY (username) REFERENCES Player(username)
+);
+
+create Table Enemies (
+    enemy_name varchar(100) Primary Key,
+    enemyhealth int(255) Not Null,
+    enemy_resist varchar(100),
+    dmg_type varchar(100) Not Null,
+    dmg_effect varchar(100),
+    dmg_number int(255),
+  	moveset varchar(100) not null
+);
+
+
 create Table Player_mutations (
     name varchar(100) Primary Key,
     mutation_effect varchar(100),
-    cost int(100),
+    cost varchar(100),
     mutation_type varchar(100),
     username varchar(100) Not Null, 
     FOREIGN KEY (username) REFERENCES Player(username)
@@ -66,11 +73,6 @@ create Table Status_effects (
     FOREIGN KEY (username) REFERENCES Player(username)
 );
 
-create Table Cosmetics (
-    skin_name varchar(100) Primary Key,
-    skin_description varchar(100),
-    unlock_condition varchar(255)
-);
 
 CREATE TABLE Enemy_Biome (
     enemy_name VARCHAR(100),
@@ -100,20 +102,20 @@ Insert Into Biomes(biome_name, biome_status_effect, biome_requirements, biome_gi
 ('Forgotten Sepulcher', 'darkness', 'teleportation runem', 'spikes'),
 ('Undying Shores', 'none', 'cultist outfit', 'none');
 
-Insert Into Player(username, cosmetics) Values
+Insert Into Player(username, cosmetics, skin_name, biome_name) Values
 ('Dave', 'Cultist Outfit'), 
 ('Garry', 'Festive Outfit'),
 ('Larry', 'Galaxy Outfit');
 
-Insert Into Player_mutations(name, mutation_effect, cost, mutation_type) Values
-('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality'),
-('Point Blank', 'attacks inflicts +30% bonus damage', 'close-ranged attack with ranged weapon', 'tactics'),
-('What doesnt kill me', 'recover 2% of max HP', 'parrying a melee attack', 'survival');
+Insert Into Player_mutations(name, mutation_effect, cost, mutation_type, username) Values
+('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality', 'Garry'),
+('Point Blank', 'attacks inflicts +30% bonus damage', 'close-ranged attack with ranged weapon', 'tactics','Larry'),
+('What doesnt kill me', 'recover 2% of max HP', 'parrying a melee attack', 'survival','Dave');
 
-Insert Into Status_effects(effect_name, effect_info) Values
-('Bleed', 'Bleed effects cause enemies to take large amounts of damage over the course of their duration. If 5 bleed effects are inflicted upon an enemy, all of the damage they would have inflicted over the course of their duration is dealt all at once in a sudden burst of blood. Enemies that are bleeding will be visibly squirting blood.'),
-('Slow', 'Slow reduces enemy movement and attack speed to around half of what it would normally be, making enemies easier to engage as they will not be able to attack as quickly.'),
-('Damage Resistance', 'Damage resistance reduces the damage of incoming hits by a percentage. It is most commonly used by the player, as multiple skills, affixes, and mutations will grant this buff to the player.');
+Insert Into Status_effects(effect_name, effect_info, username) Values
+('Bleed', 'Bleed effects cause enemies to take large amounts of damage over the course of their duration. If 5 bleed effects are inflicted upon an enemy, all of the damage they would have inflicted over the course of their duration is dealt all at once in a sudden burst of blood. Enemies that are bleeding will be visibly squirting blood.','Garry'),
+('Slow', 'Slow reduces enemy movement and attack speed to around half of what it would normally be, making enemies easier to engage as they will not be able to attack as quickly.','Larry'),
+('Damage Resistance', 'Damage resistance reduces the damage of incoming hits by a percentage. It is most commonly used by the player, as multiple skills, affixes, and mutations will grant this buff to the player.','Dave');
 
 Insert Into Cosmetics(skin_name, skin_description, unlock_condition) Values
 ('Cultist Outfit', 'Do you have a minute to talk about our Lord and Saviour?', 'Drops from any of the corpses scattered inside the large floating islands of Fractured Shrines; can be instantly equipped with the Homunculus Rune'),
