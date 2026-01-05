@@ -93,12 +93,12 @@ Insert Into Cosmetics(skin_name, skin_description, unlock_condition) Values
 ('Golden Outfit', 'You definitely wont go unnoticed wearing this.', 'Specialist Shop in the Prisoners Quarters; costs 10,000 gold or a 50-kill curse');
 
 Insert Into Biomes(biome_name, biome_status_effect, biome_requirements, biome_gimmick) Values
-('Prisoners Quarters', 'none', 'none', 'none'),
+('Toxic Sewers', 'none', 'vine rune', 'pools of poison'),
 ('Forgotten Sepulcher', 'darkness', 'teleportation runem', 'spikes'),
 ('Undying Shores', 'none', 'cultist outfit', 'none');
 
 INSERT INTO Player (username, status_effects, cosmetics, skin_name, biome_name) Values
-('Dave', NULL, 'Cultist Outfit', 'Cultist Outfit', 'Prisoners Quarters'),
+('Dave', NULL, 'Cultist Outfit', 'Cultist Outfit', 'Toxic Sewers'),
 ('Garry', NULL, 'Festive Outfit', 'Golden Outfit', 'Undying Shores'),
 ('Larry', NULL, 'Galaxy Outfit', 'Flawless Concierge Outfit', 'Forgotten Sepulcher');
 
@@ -122,4 +122,5 @@ Insert Into Status_effects(effect_name, effect_info, username) Values
 ('Slow', 'Slow reduces enemy movement and attack speed to around half of what it would normally be, making enemies easier to engage as they will not be able to attack as quickly.','Larry'),
 ('Damage Resistance', 'Damage resistance reduces the damage of incoming hits by a percentage. It is most commonly used by the player, as multiple skills, affixes, and mutations will grant this buff to the player.','Dave');
 
-Insert Into () Values
+Insert into Enemy_Biome (enemy_name, biome_name) Values
+('Scorpion', 'Toxic Sewers');
