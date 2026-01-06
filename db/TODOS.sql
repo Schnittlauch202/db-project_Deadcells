@@ -59,7 +59,7 @@ create Table Enemies (
 
 
 create Table Player_mutations (
-    name varchar(100) Primary Key,
+    mutation_name varchar(100) Primary Key,
     mutation_effect varchar(100),
     cost varchar(100),
     mutation_type varchar(100),
@@ -112,7 +112,7 @@ Insert Into Enemies(enemy_name, enemyhealth, enemy_resist, dmg_type, dmg_effect,
 ('The Concierge', 4000, NULL, 'ranged, AOE, melee', 'stun with "shout" attack', NULL, 'attack: stab, firestrike, leap,defence: shout, Aura of laceration'),
 ('Ground Shaker', 300, 'immune to stun, cannot be harmed from the back', 'melee, ranged, AOE', 'ranged and AOE cannot be parried or dodge rolled',NULL, 'Avalanche, swipe combo');
 
-Insert Into Player_mutations(name, mutation_effect, cost, mutation_type, username) Values
+Insert Into Player_mutations(mutation_name, mutation_effect, cost, mutation_type, username) Values
 ('Predator', 'invisibility', 'killing an enemy with melee strike', 'brutality', 'Garry'),
 ('Point Blank', 'attacks inflicts +30% bonus damage', 'close-ranged attack with ranged weapon', 'tactics','Larry'),
 ('What doesnt kill me', 'recover 2% of max HP', 'parrying a melee attack', 'survival','Dave');
