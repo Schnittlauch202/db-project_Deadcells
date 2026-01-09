@@ -132,3 +132,115 @@ def complete():
 
 if __name__ == "__main__":
     app.run()
+
+
+# -----------------------------
+# DB Explorer
+# -----------------------------
+
+def _get_table_names():
+    """Return list of base table names in the current schema."""
+    schema = os.getenv("DB_DATABASE")
+    rows = db_read(
+        """
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = %s
+          AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+        """,
+        (schema,)
+    )
+    return [r["table_name"] for r in rows]
+
+
+def _get_table_columns(table_name: str):
+    """Return ordered list of column names for a given table in current schema."""
+    schema = os.getenv("DB_DATABASE")
+    rows = db_read(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = %s
+          AND table_name = %s
+        ORDER BY ordinal_position
+        """,
+        (schema, table_name)
+    )
+    return [r["column_name"] for r in rows]
+
+
+@app.route("/dbexplorer", methods=["GET"])
+@login_required
+def dbexplorer():
+    tables = _get_table_names()
+    return render_template("dbexplorer.html", tables=tables)
+
+
+@app.route("/dbexplorer/api/table", methods=["POST"])
+@login_required
+def dbexplorer_api_table():
+    payload = request.get_json(silent=True) or {}
+
+    table = (payload.get("table") or "").strip()
+    limit = payload.get("limit", 50)
+    offset = payload.get("offset", 0)
+    filter_column = (payload.get("filter_column") or "").strip()
+    filter_value = (payload.get("filter_value") or "").strip()
+
+    # Defensive parsing / caps
+    try:
+        limit = int(limit)
+    except Exception:
+        limit = 50
+    try:
+        offset = int(offset)
+    except Exception:
+        offset = 0
+
+    limit = max(1, min(limit, 500))     # cap to keep UI responsive
+    offset = max(0, offset)
+
+    # Whitelist table name
+    allowed_tables = set(_get_table_names())
+    if table not in allowed_tables:
+        return jsonify({"ok": False, "error": "Unknown or disallowed table."}), 400
+
+    # Whitelist columns for that table
+    columns = _get_table_columns(table)
+    allowed_columns = set(columns)
+
+    where_sql = ""
+    params = []
+
+    if filter_value:
+        # If a column is provided, constrain filtering to that column;
+        # else do a simple OR-LIKE across all columns (cast to char)
+        if filter_column:
+            if filter_column not in allowed_columns:
+                return jsonify({"ok": False, "error": "Unknown or disallowed column."}), 400
+            where_sql = f"WHERE CAST(`{filter_column}` AS CHAR) LIKE %s"
+            params.append(f"%{filter_value}%")
+        else:
+            # OR-LIKE across columns (best-effort; still safe via whitelisting)
+            ors = []
+            for c in columns:
+                ors.append(f"CAST(`{c}` AS CHAR) LIKE %s")
+                params.append(f"%{filter_value}%")
+            where_sql = "WHERE " + " OR ".join(ors)
+
+    # Build query using only whitelisted identifiers
+    sql = f"SELECT * FROM `{table}` {where_sql} LIMIT %s OFFSET %s"
+    params.extend([limit, offset])
+
+    rows = db_read(sql, tuple(params))
+
+    return jsonify({
+        "ok": True,
+        "table": table,
+        "columns": columns,
+        "rows": rows,
+        "limit": limit,
+        "offset": offset,
+        "returned": len(rows),
+    })
