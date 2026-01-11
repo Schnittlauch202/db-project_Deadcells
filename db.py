@@ -17,7 +17,7 @@ DB_CONFIG = {
 POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "1"))
 POOL_SIZE = max(1, min(POOL_SIZE, 2))
 
-pool = pooling.MySQLConnectionPool(pool_name="pool", pool_size=POOL_SIZE, **DB_CONFIG)
+pool = pooling.MySQLConnectionPool(pool_name="pool", pool_size=2, **DB_CONFIG)
 
 def get_conn():
     return pool.get_connection()
