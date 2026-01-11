@@ -135,7 +135,6 @@ def complete():
 # -----------------------------
 
 def _get_table_names():
-    """Return list of base table names in the current schema."""
     schema = os.getenv("DB_DATABASE")
     rows = db_read(
         """
@@ -147,11 +146,20 @@ def _get_table_names():
         """,
         (schema,)
     )
-    return [r["table_name"] for r in rows]
+
+    # Works whether db_read returns dicts or tuples
+    tables = []
+    for r in rows:
+        if isinstance(r, dict):
+            tables.append(r.get("table_name"))
+        else:
+            tables.append(r[0] if len(r) else None)
+
+    return [t for t in tables if t]
+
 
 
 def _get_table_columns(table_name: str):
-    """Return ordered list of column names for a given table in current schema."""
     schema = os.getenv("DB_DATABASE")
     rows = db_read(
         """
@@ -163,7 +171,16 @@ def _get_table_columns(table_name: str):
         """,
         (schema, table_name)
     )
-    return [r["column_name"] for r in rows]
+
+    cols = []
+    for r in rows:
+        if isinstance(r, dict):
+            cols.append(r.get("column_name"))
+        else:
+            cols.append(r[0] if len(r) else None)
+
+    return [c for c in cols if c]
+
 
 
 @app.route("/dbexplorer", methods=["GET"])
