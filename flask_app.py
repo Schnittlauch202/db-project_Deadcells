@@ -135,52 +135,33 @@ def complete():
 # -----------------------------
 
 def _get_table_names():
-    schema = os.getenv("DB_DATABASE")
-    rows = db_read(
-        """
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = %s
-          AND table_type = 'BASE TABLE'
-        ORDER BY table_name
-        """,
-        (schema,)
-    )
+    rows = db_read("SHOW TABLES")
 
-    # Works whether db_read returns dicts or tuples
     tables = []
     for r in rows:
         if isinstance(r, dict):
-            tables.append(r.get("table_name"))
+            # SHOW TABLES returns a dict like {"Tables_in_<dbname>": "todos"}
+            tables.append(next(iter(r.values())))
         else:
-            tables.append(r[0] if len(r) else None)
+            # tuple mode: ("todos",)
+            tables.append(r[0] if r else None)
 
     return [t for t in tables if t]
 
 
-
 def _get_table_columns(table_name: str):
-    schema = os.getenv("DB_DATABASE")
-    rows = db_read(
-        """
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_schema = %s
-          AND table_name = %s
-        ORDER BY ordinal_position
-        """,
-        (schema, table_name)
-    )
+    # SHOW COLUMNS returns rows with Field/Type/Null/Key/Default/Extra
+    rows = db_read(f"SHOW COLUMNS FROM `{table_name}`")
 
     cols = []
     for r in rows:
         if isinstance(r, dict):
-            cols.append(r.get("column_name"))
+            cols.append(r.get("Field"))
         else:
-            cols.append(r[0] if len(r) else None)
+            # tuple mode: first column is Field
+            cols.append(r[0] if r else None)
 
     return [c for c in cols if c]
-
 
 
 @app.route("/dbexplorer", methods=["GET"])
