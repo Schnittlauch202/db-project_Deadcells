@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 
 # Load .env variables
-load_dotenv()
+load_dotenv("/home/Schnittlauch202/mysite/.env")
 W_SECRET = os.getenv("W_SECRET")
 
 # Init flask app
