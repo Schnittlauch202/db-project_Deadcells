@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, jsonify
 from dotenv import load_dotenv
 import os
 import git
@@ -130,10 +130,6 @@ def complete():
     db_write("DELETE FROM todos WHERE user_id=%s AND id=%s", (current_user.id, todo_id,))
     return redirect(url_for("index"))
 
-if __name__ == "__main__":
-    app.run()
-
-
 # -----------------------------
 # DB Explorer
 # -----------------------------
@@ -244,3 +240,7 @@ def dbexplorer_api_table():
         "offset": offset,
         "returned": len(rows),
     })
+
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
+
