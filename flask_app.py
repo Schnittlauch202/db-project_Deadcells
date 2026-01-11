@@ -136,32 +136,15 @@ def complete():
 
 def _get_table_names():
     rows = db_read("SHOW TABLES")
-
-    tables = []
-    for r in rows:
-        if isinstance(r, dict):
-            # SHOW TABLES returns a dict like {"Tables_in_<dbname>": "todos"}
-            tables.append(next(iter(r.values())))
-        else:
-            # tuple mode: ("todos",)
-            tables.append(r[0] if r else None)
-
-    return [t for t in tables if t]
+    # SHOW TABLES returns dicts like {"Tables_in_<db>": "<table>"}
+    return [list(r.values())[0] for r in rows]
 
 
 def _get_table_columns(table_name: str):
-    # SHOW COLUMNS returns rows with Field/Type/Null/Key/Default/Extra
     rows = db_read(f"SHOW COLUMNS FROM `{table_name}`")
+    # dicts like {"Field": "...", "Type": "...", ...}
+    return [r["Field"] for r in rows]
 
-    cols = []
-    for r in rows:
-        if isinstance(r, dict):
-            cols.append(r.get("Field"))
-        else:
-            # tuple mode: first column is Field
-            cols.append(r[0] if r else None)
-
-    return [c for c in cols if c]
 
 
 @app.route("/dbexplorer", methods=["GET"])
