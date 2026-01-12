@@ -106,6 +106,11 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+@app.route("/users", methods=["GET"])
+@login_required
+def users():
+    pass
+
 
 
 # App routes
