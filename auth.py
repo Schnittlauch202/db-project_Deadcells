@@ -111,3 +111,10 @@ def authenticate(username, password):
 
     logger.warning("authenticate(): falsches Passwort für '%s'", username)
     return None
+
+    if check_password_hash(user.password, password):
+        logger.info("authenticate(): Passwort korrekt für '%s'", username)
+        return user
+
+    logger.warning("authenticate(): falsches Passwort für '%s'", username)
+    return None
