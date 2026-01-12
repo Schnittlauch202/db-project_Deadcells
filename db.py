@@ -1,45 +1,57 @@
 from dotenv import load_dotenv
 import os
-import mysql.connector
+from mysql.connector import pooling
 
-# Always load env for BOTH bash and WSGI (absolute path)
-load_dotenv("/home/Schnittlauch202/mysite/.env")
-
+# Load .env variables
+load_dotenv()
 DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
-    "database": os.getenv("DB_DATABASE"),
-    "port": int(os.getenv("DB_PORT", "3306")),
-    "autocommit": True,
+    "database": os.getenv("DB_DATABASE")
 }
 
+# Init db
+pool = pooling.MySQLConnectionPool(pool_name="pool", pool_size=5, **DB_CONFIG)
 def get_conn():
-    # Fail fast if env is missing (prevents silent localhost fallback)
-    if not DB_CONFIG["host"] or not DB_CONFIG["user"] or not DB_CONFIG["database"]:
-        raise RuntimeError(f"DB env not loaded correctly: {DB_CONFIG}")
-    return mysql.connector.connect(**DB_CONFIG)
+    return pool.get_connection()
 
+# DB-Helper
 def db_read(sql, params=None, single=False):
     conn = get_conn()
-    cur = None
     try:
         cur = conn.cursor(dictionary=True)
         cur.execute(sql, params or ())
-        return cur.fetchone() if single else cur.fetchall()
+
+        if single:
+            # liefert EIN Dict oder None
+            row = cur.fetchone()
+            print("db_read(single=True) ->", row)   # DEBUG
+            return row
+        else:
+            # liefert Liste von Dicts (evtl. [])
+            rows = cur.fetchall()
+            print("db_read(single=False) ->", rows)  # DEBUG
+            return rows
+
     finally:
-        if cur is not None:
+        try:
             cur.close()
+        except:
+            pass
         conn.close()
+
 
 def db_write(sql, params=None):
     conn = get_conn()
-    cur = None
     try:
         cur = conn.cursor()
         cur.execute(sql, params or ())
         conn.commit()
+        print("db_write OK:", sql, params)  # DEBUG
     finally:
-        if cur is not None:
+        try:
             cur.close()
+        except:
+            pass
         conn.close()
