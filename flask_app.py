@@ -24,6 +24,7 @@ app.config["DEBUG"] = True
 app.secret_key = "supersecret"
 
 # Init auth
+login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
@@ -135,9 +136,13 @@ def complete():
 # -----------------------------
 
 def _get_table_names():
-    rows = db_read("SHOW TABLES")
-    # SHOW TABLES returns dicts like {"Tables_in_<db>": "<table>"}
-    return [list(r.values())[0] for r in rows]
+    rows = db_read("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = DATABASE()
+        ORDER BY table_name
+    """)
+    return [r["table_name"] for r in rows]
 
 
 def _get_table_columns(table_name: str):
@@ -224,4 +229,3 @@ def dbexplorer_api_table():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
-
