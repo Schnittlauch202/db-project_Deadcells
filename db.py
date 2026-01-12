@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import os
-from mysql.connector import pooling
+import mysql.connector
 
-# On PythonAnywhere, use an absolute path so WSGI reliably loads the env file.
+# Always load env for BOTH bash and WSGI (absolute path)
 load_dotenv("/home/Schnittlauch202/mysite/.env")
 
 DB_CONFIG = {
@@ -10,17 +10,15 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_DATABASE"),
+    "port": int(os.getenv("DB_PORT", "3306")),
     "autocommit": True,
 }
 
-# PythonAnywhere MySQL user limit is low; start with 1.
-POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "1"))
-POOL_SIZE = max(1, min(POOL_SIZE, 2))
-
-pool = pooling.MySQLConnectionPool(pool_name="pool", pool_size=2, **DB_CONFIG)
-
 def get_conn():
-    return pool.get_connection()
+    # Fail fast if env is missing (prevents silent localhost fallback)
+    if not DB_CONFIG["host"] or not DB_CONFIG["user"] or not DB_CONFIG["database"]:
+        raise RuntimeError(f"DB env not loaded correctly: {DB_CONFIG}")
+    return mysql.connector.connect(**DB_CONFIG)
 
 def db_read(sql, params=None, single=False):
     conn = get_conn()
@@ -30,11 +28,9 @@ def db_read(sql, params=None, single=False):
         cur.execute(sql, params or ())
         return cur.fetchone() if single else cur.fetchall()
     finally:
-        try:
-            if cur is not None:
-                cur.close()
-        finally:
-            conn.close()
+        if cur is not None:
+            cur.close()
+        conn.close()
 
 def db_write(sql, params=None):
     conn = get_conn()
@@ -44,8 +40,6 @@ def db_write(sql, params=None):
         cur.execute(sql, params or ())
         conn.commit()
     finally:
-        try:
-            if cur is not None:
-                cur.close()
-        finally:
-            conn.close()
+        if cur is not None:
+            cur.close()
+        conn.close()
