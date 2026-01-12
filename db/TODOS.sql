@@ -1,13 +1,3 @@
-Drop Table Equip; 
-Drop Table Enemies; 
-Drop Table Biomes;
-Drop Table Player; 
-Drop Table Player_mutations; 
-Drop Table Status_effects; 
-Drop Table Cosmetics;
-Drop Table Enemy_Biome; 
-
-
 create Table Cosmetics (
     skin_name varchar(100) Primary Key,
     skin_description varchar(100),
