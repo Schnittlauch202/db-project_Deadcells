@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for, jsonify
+from flask import Flask, redirect, render_template, request, url_for
 from dotenv import load_dotenv
 import os
 import git
@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 
 # Load .env variables
-load_dotenv("/home/Schnittlauch202/mysite/.env")
+load_dotenv()
 W_SECRET = os.getenv("W_SECRET")
 
 # Init flask app
@@ -24,7 +24,6 @@ app.config["DEBUG"] = True
 app.secret_key = "supersecret"
 
 # Init auth
-login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
@@ -131,101 +130,6 @@ def complete():
     db_write("DELETE FROM todos WHERE user_id=%s AND id=%s", (current_user.id, todo_id,))
     return redirect(url_for("index"))
 
-# -----------------------------
-# DB Explorer
-# -----------------------------
-
-def _get_table_names():
-    rows = db_read("""
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = DATABASE()
-        ORDER BY table_name
-    """)
-    return [r["table_name"] for r in rows]
-
-
-def _get_table_columns(table_name: str):
-    rows = db_read(f"SHOW COLUMNS FROM `{table_name}`")
-    # dicts like {"Field": "...", "Type": "...", ...}
-    return [r["Field"] for r in rows]
-
-
-
-@app.route("/dbexplorer", methods=["GET"])
-@login_required
-def dbexplorer():
-    tables = _get_table_names()
-    return render_template("dbexplorer.html", tables=tables)
-
-
-@app.route("/dbexplorer/api/table", methods=["POST"])
-@login_required
-def dbexplorer_api_table():
-    payload = request.get_json(silent=True) or {}
-
-    table = (payload.get("table") or "").strip()
-    limit = payload.get("limit", 50)
-    offset = payload.get("offset", 0)
-    filter_column = (payload.get("filter_column") or "").strip()
-    filter_value = (payload.get("filter_value") or "").strip()
-
-    # Defensive parsing / caps
-    try:
-        limit = int(limit)
-    except Exception:
-        limit = 50
-    try:
-        offset = int(offset)
-    except Exception:
-        offset = 0
-
-    limit = max(1, min(limit, 500))     # cap to keep UI responsive
-    offset = max(0, offset)
-
-    # Whitelist table name
-    allowed_tables = set(_get_table_names())
-    if table not in allowed_tables:
-        return jsonify({"ok": False, "error": "Unknown or disallowed table."}), 400
-
-    # Whitelist columns for that table
-    columns = _get_table_columns(table)
-    allowed_columns = set(columns)
-
-    where_sql = ""
-    params = []
-
-    if filter_value:
-        # If a column is provided, constrain filtering to that column;
-        # else do a simple OR-LIKE across all columns (cast to char)
-        if filter_column:
-            if filter_column not in allowed_columns:
-                return jsonify({"ok": False, "error": "Unknown or disallowed column."}), 400
-            where_sql = f"WHERE CAST(`{filter_column}` AS CHAR) LIKE %s"
-            params.append(f"%{filter_value}%")
-        else:
-            # OR-LIKE across columns (best-effort; still safe via whitelisting)
-            ors = []
-            for c in columns:
-                ors.append(f"CAST(`{c}` AS CHAR) LIKE %s")
-                params.append(f"%{filter_value}%")
-            where_sql = "WHERE " + " OR ".join(ors)
-
-    # Build query using only whitelisted identifiers
-    sql = f"SELECT * FROM `{table}` {where_sql} LIMIT %s OFFSET %s"
-    params.extend([limit, offset])
-
-    rows = db_read(sql, tuple(params))
-
-    return jsonify({
-        "ok": True,
-        "table": table,
-        "columns": columns,
-        "rows": rows,
-        "limit": limit,
-        "offset": offset,
-        "returned": len(rows),
-    })
-
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run()
+
