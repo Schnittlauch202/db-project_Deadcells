@@ -1,5 +1,7 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, jsonify
 from dotenv import load_dotenv
+from datetime import datetime, date
+from decimal import Decimal
 import os
 import git
 import hmac
@@ -45,6 +47,69 @@ def webhook():
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
     return 'Unathorized', 401
+
+
+
+def _list_tables():
+    rows = db_read("SHOW TABLES")
+    if not rows:
+        return []
+    key = next(iter(rows[0].keys()))  # e.g. "Tables_in_<db>"
+    return [r[key] for r in rows]
+
+def _json_safe(v):
+    if isinstance(v, datetime):
+        return v.isoformat(sep=" ", timespec="seconds")
+    if isinstance(v, date):
+        return v.isoformat()
+    if isinstance(v, Decimal):
+        return float(v)
+    return v
+
+#app routes
+@app.route("/dbexplorer", methods=["GET"])
+@login_required
+def dbexplorer():
+    table_names = _list_tables()
+    return render_template("db_explorer.html", table_names=table_names)
+
+@app.route("/dbexplorer/api/tables", methods=["POST"])
+@login_required
+def dbexplorer_api_tables():
+    allowed = set(_list_tables())
+
+    payload = request.get_json(silent=True) or {}
+    tables = payload.get("tables", [])
+    limit = payload.get("limit", 50)
+
+    if isinstance(tables, str):
+        tables = [tables]
+
+    try:
+        limit = int(limit)
+    except Exception:
+        limit = 50
+    limit = max(1, min(limit, 500))  # hard cap for safety
+
+    out = {}
+    for t in tables:
+        if t not in allowed:
+            continue
+
+        # Get column names reliably even if the table is empty
+        cols = [r["Field"] for r in db_read(f"DESCRIBE `{t}`")]
+
+        rows = db_read(f"SELECT * FROM `{t}` LIMIT %s", (limit,))
+        clean_rows = [{k: _json_safe(v) for k, v in row.items()} for row in rows]
+
+        out[t] = {
+            "columns": cols,
+            "rows": clean_rows,
+            "count": len(clean_rows),
+            "limit": limit,
+        }
+
+    return jsonify(out)
 
 # Auth routes
 @app.route("/login", methods=["GET", "POST"])

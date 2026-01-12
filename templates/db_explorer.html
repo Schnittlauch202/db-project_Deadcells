@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .dbx-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .dbx-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .dbx-card {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+
+  .dbx-card header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .dbx-card header h2, .dbx-card header h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .dbx-card .dbx-body {
+    padding: 14px;
+  }
+
+  .dbx-controls label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 10px 0 6px;
+    color: #333;
+  }
+
+  .dbx-controls input[type="text"],
+  .dbx-controls input[type="number"]{
+    width: 100%;
+    padding: 10px 10px;
+    border-radius: 8px;
+    border: 1px solid #d8d8d8;
+    outline: none;
+  }
+
+  .dbx-btnrow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .dbx-btn {
+    appearance: none;
+    border: 1px solid #d0d0d0;
+    background: #f7f7f7;
+    border-radius: 8px;
+    padding: 9px 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .dbx-btn.primary {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+  }
+
+  .dbx-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .dbx-small {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .dbx-list {
+    margin-top: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    max-height: 420px;
+    overflow: auto;
+  }
+
+  .dbx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 6px;
+    border-radius: 8px;
+  }
+
+  .dbx-item:hover {
+    background: #fafafa;
+  }
+
+  .dbx-item code {
+    font-size: 12px;
+  }
+
+  .dbx-status {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fbfbfb;
+    font-size: 13px;
+  }
+
+  .dbx-results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .dbx-tablewrap {
+    overflow: auto;
+    border-top: 1px solid #eee;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+
+  table.dbx-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    min-width: 600px;
+  }
+
+  table.dbx-table th, table.dbx-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  table.dbx-table th {
+    position: sticky;
+    top: 0;
+    background: #f6f6f6;
+    z-index: 1;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  table.dbx-table tbody tr:nth-child(even) td {
+    background: #fcfcfc;
+  }
+
+  .dbx-pill {
+    font-size: 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #fafafa;
+    color: #444;
+  }
+
+  .dbx-empty {
+    padding: 12px 14px;
+    color: #666;
+    font-size: 13px;
+  }
+
+  @media (max-width: 980px) {
+    .dbx-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="dbx-wrap">
+  <h1 style="margin:0 0 10px;">DB Explorer</h1>
+  <div class="dbx-small">Select one or more tables, set a row limit, then load.</div>
+
+  <div class="dbx-grid" style="margin-top: 14px;">
+    <!-- Left: Controls -->
+    <div class="dbx-card dbx-controls">
+      <header>
+        <h2>Controls</h2>
+        <span class="dbx-pill">{{ table_names|length }} tables</span>
+      </header>
+      <div class="dbx-body">
+        <label for="tableSearch">Search tables</label>
+        <input id="tableSearch" type="text" placeholder="e.g. todos, users…" autocomplete="off">
+
+        <label for="rowLimit">Row limit (1–500)</label>
+        <input id="rowLimit" type="number" min="1" max="500" value="50">
+
+        <label for="rowFilter">Client-side row filter (optional)</label>
+        <input id="rowFilter" type="text" placeholder="Filters displayed rows (does not query DB)">
+
+        <div class="dbx-btnrow">
+          <button class="dbx-btn" id="selectAllBtn" type="button">Select all</button>
+          <button class="dbx-btn" id="clearBtn" type="button">Clear</button>
+          <button class="dbx-btn primary" id="loadBtn" type="button">Load selected</button>
+        </div>
+
+        <div class="dbx-status" id="statusBox">Ready.</div>
+
+        <div class="dbx-list" id="tableList">
+          {% for t in table_names %}
+            <label class="dbx-item" data-table="{{ t|lower }}">
+              <input type="checkbox" class="tableCheckbox" value="{{ t }}">
+              <code>{{ t }}</code>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="dbx-results" id="results"></div>
+  </div>
+</div>
+
+<script>
+  const tableSearch = document.getElementById("tableSearch");
+  const tableList = document.getElementById("tableList");
+  const rowLimit = document.getElementById("rowLimit");
+  const rowFilter = document.getElementById("rowFilter");
+  const statusBox = document.getElementById("statusBox");
+  const results = document.getElementById("results");
+  const loadBtn = document.getElementById("loadBtn");
+  const selectAllBtn = document.getElementById("selectAllBtn");
+  const clearBtn = document.getElementById("clearBtn");
+
+  function setStatus(msg) {
+    statusBox.textContent = msg;
+  }
+
+  function getSelectedTables() {
+    return Array.from(document.querySelectorAll(".tableCheckbox:checked"))
+      .map(cb => cb.value);
+  }
+
+  function applyClientSideFilter() {
+    const term = (rowFilter.value || "").trim().toLowerCase();
+    const cards = results.querySelectorAll("[data-table-card]");
+    cards.forEach(card => {
+      const rows = card.querySelectorAll("tbody tr");
+      rows.forEach(tr => {
+        if (!term) {
+          tr.style.display = "";
+          return;
+        }
+        const text = tr.textContent.toLowerCase();
+        tr.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+  }
+
+  function escapeText(s) {
+    if (s === null || s === undefined) return "";
+    return String(s);
+  }
+
+  function renderTableCard(tableName, payload) {
+    const card = document.createElement("div");
+    card.className = "dbx-card";
+    card.setAttribute("data-table-card", tableName);
+
+    const header = document.createElement("header");
+    const h3 = document.createElement("h3");
+    h3.textContent = tableName;
+
+    const meta = document.createElement("span");
+    meta.className = "dbx-pill";
+    meta.textContent = `${payload.count} rows (limit ${payload.limit})`;
+
+    header.appendChild(h3);
+    header.appendChild(meta);
+    card.appendChild(header);
+
+    if (!payload.columns || payload.columns.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "dbx-empty";
+      empty.textContent = "No columns returned.";
+      card.appendChild(empty);
+      return card;
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "dbx-tablewrap";
+
+    const table = document.createElement("table");
+    table.className = "dbx-table";
+
+    const thead = document.createElement("thead");
+    const thr = document.createElement("tr");
+    payload.columns.forEach(col => {
+      const th = document.createElement("th");
+      th.textContent = col;
+      thr.appendChild(th);
+    });
+    thead.appendChild(thr);
+
+    const tbody = document.createElement("tbody");
+
+    if (!payload.rows || payload.rows.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = payload.columns.length;
+      td.className = "dbx-empty";
+      td.textContent = "No rows returned.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    } else {
+      payload.rows.forEach(r => {
+        const tr = document.createElement("tr");
+        payload.columns.forEach(col => {
+          const td = document.createElement("td");
+          td.textContent = escapeText(r[col]);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    wrap.appendChild(table);
+    card.appendChild(wrap);
+    return card;
+  }
+
+  async function loadSelected() {
+    const tables = getSelectedTables();
+    const limit = rowLimit.value;
+
+    if (tables.length === 0) {
+      setStatus("Please select at least one table.");
+      results.innerHTML = "";
+      return;
+    }
+
+    setStatus(`Loading ${tables.length} table(s)…`);
+    results.innerHTML = "";
+    loadBtn.disabled = true;
+
+    try {
+      const resp = await fetch("/dbexplorer/api/tables", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ tables, limit })
+      });
+
+      if (!resp.ok) {
+        setStatus(`Request failed: HTTP ${resp.status}`);
+        return;
+      }
+
+      const data = await resp.json();
+
+      const returnedTables = Object.keys(data);
+      if (returnedTables.length === 0) {
+        setStatus("No data returned (tables may not exist or are not allowed).");
+        return;
+      }
+
+      returnedTables.forEach(t => {
+        results.appendChild(renderTableCard(t, data[t]));
+      });
+
+      setStatus(`Loaded: ${returnedTables.join(", ")}`);
+      applyClientSideFilter();
+    } catch (e) {
+      setStatus("Error loading tables. Check server logs.");
+    } finally {
+      loadBtn.disabled = false;
+    }
+  }
+
+  // Events
+  loadBtn.addEventListener("click", loadSelected);
+
+  selectAllBtn.addEventListener("click", () => {
+    document.querySelectorAll(".tableCheckbox").forEach(cb => cb.checked = true);
+    setStatus("All tables selected.");
+  });
+
+  clearBtn.addEventListener("click", () => {
+    document.querySelectorAll(".tableCheckbox").forEach(cb => cb.checked = false);
+    results.innerHTML = "";
+    setStatus("Cleared selection.");
+  });
+
+  tableSearch.addEventListener("input", () => {
+    const q = tableSearch.value.trim().toLowerCase();
+    const items = tableList.querySelectorAll("[data-table]");
+    items.forEach(el => {
+      const name = el.getAttribute("data-table") || "";
+      el.style.display = (!q || name.includes(q)) ? "" : "none";
+    });
+  });
+
+  rowFilter.addEventListener("input", applyClientSideFilter);
+</script>
+{% endblock %}
