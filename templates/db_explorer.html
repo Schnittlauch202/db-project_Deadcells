@@ -211,7 +211,7 @@
       </header>
       <div class="dbx-body">
         <div class="dbx-status" id="statusBox">Ready.</div>
-        {% set HIDDEN_TABLES = ['todo', 'users'] %}
+        {% set HIDDEN_TABLES = ['todos', 'users'] %}
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
             {% if t|lower not in HIDDEN_TABLES %}
