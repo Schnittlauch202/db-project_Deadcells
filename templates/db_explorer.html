@@ -210,9 +210,8 @@
         <span class="dbx-pill">{{ table_names|length }} tables</span>
       </header>
       <div class="dbx-body">
-
         <div class="dbx-status" id="statusBox">Ready.</div>
-
+        {% set HIDDEN_TABLES = ['todo', 'users'] %}
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
             {% if t|lower not in HIDDEN_TABLES %}
@@ -222,13 +221,11 @@
             {% endif %}
           {% endfor %}
         </div>
-
-
       </div>
+    </div>
 
     <!-- Right: Results -->
     <div class="dbx-results" id="results"></div>
-
   </div>
 </div>
 
