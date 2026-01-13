@@ -12,18 +12,6 @@
     outline: 2px solid #111;
   }
 
-  .dbx-item-btn{
-    width: 100%;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
-  }
-  .dbx-item-btn.active{
-    background: #f3f3f3;
-    outline: 2px solid #111;
-  }
-
   .dbx-wrap {
     max-width: 1200px;
     margin: 0 auto;
@@ -222,17 +210,6 @@
         <span class="dbx-pill">{{ table_names|length }} tables</span>
       </header>
       <div class="dbx-body">
-        <div class="dbx-list" id="tableList">
-          {% for t in table_names %}
-            {% if t|lower not in HIDDEN_TABLES %}
-              <button class="dbx-item dbx-item-btn" type="button"
-                      data-table="{{ t }}" data-table-lower="{{ t|lower }}">
-                <code>{{ t }}</code>
-                <span class="dbx-pill" style="margin-left:auto;">click to toggle</span>
-              </button>
-            {% endif %}
-          {% endfor %}
-        </div>
 
         <div class="dbx-status" id="statusBox">Ready.</div>
 
@@ -241,15 +218,16 @@
             {% if t|lower not in HIDDEN_TABLES %}
               <div class="dbx-item" data-table="{{ t }}">
                 <code class="dbx-tablelink">{{ t }}</code>
-              <div>
+              </div>
             {% endif %}
           {% endfor %}
         </div>
-      </div>
+
+</div>
+
     </div>
 
     <!-- Right: Results -->
-    <div class="dbx-results" id="results"></div>
   </div>
 </div>
 
