@@ -359,6 +359,79 @@
     card.appendChild(wrap);
     return card;
   }
+    const loadedTables = new Set();
+
+    async function fetchAndRenderTables(tables) {
+      const limit = rowLimit.value;
+
+      setStatus(`Loading ${tables.length} table(s)…`);
+
+      try {
+        const resp = await fetch("/dbexplorer/api/tables", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ tables, limit })
+        });
+
+        if (!resp.ok) {
+          setStatus(`Request failed: HTTP ${resp.status}`);
+          return;
+        }
+
+        const data = await resp.json();
+        const returned = Object.keys(data);
+
+        if (returned.length === 0) {
+          setStatus("No data returned.");
+          return;
+        }
+
+        returned.forEach(t => {
+          // If already present, replace it (useful when limit changes)
+          const existing = results.querySelector(`[data-table-card="${t}"]`);
+          if (existing) existing.remove();
+
+          results.appendChild(renderTableCard(t, data[t]));
+        });
+
+        setStatus(`Loaded: ${returned.join(", ")}`);
+        applyClientSideFilter();
+      } catch (e) {
+        setStatus("Error loading tables. Check server logs.");
+      }
+    }
+
+    function removeTableCard(tableName) {
+      const el = results.querySelector(`[data-table-card="${tableName}"]`);
+      if (el) el.remove();
+    }
+
+    function updateActiveStyle(tableName, isActive) {
+      const btn = tableList.querySelector(`button[data-table="${CSS.escape(tableName)}"]`);
+      if (btn) btn.classList.toggle("active", isActive);
+    }
+
+    // Click-to-toggle behavior
+    tableList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-table]");
+      if (!btn) return;
+
+      const tableName = btn.getAttribute("data-table");
+
+      if (loadedTables.has(tableName)) {
+        loadedTables.delete(tableName);
+        removeTableCard(tableName);
+        updateActiveStyle(tableName, false);
+
+        if (loadedTables.size === 0) setStatus("Ready.");
+        else setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
+        return;
+      }
+
+      loadedTables.add(tableName);
+      updateActiveStyle(tableName, true);
+      await fetchAndRenderTables([tableName]);
+    });
 
   async function loadSelected() {
     const tables = getSelectedTables();
