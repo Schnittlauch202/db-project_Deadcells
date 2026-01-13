@@ -3,6 +3,15 @@
 {% block content %}
 {% set HIDDEN_TABLES = ['todos', 'users'] %}
 <style>
+  .dbx-tablelink{
+    cursor: pointer;
+    user-select: none;
+  }
+  .dbx-item.active{
+    background: #f3f3f3;
+    outline: 2px solid #111;
+  }
+
   .dbx-item-btn{
     width: 100%;
     border: 0;
@@ -213,14 +222,6 @@
         <span class="dbx-pill">{{ table_names|length }} tables</span>
       </header>
       <div class="dbx-body">
-        <label for="tableSearch">Search tables</label>
-        <input id="tableSearch" type="text" placeholder="e.g. equip, Biomes…" autocomplete="off">
-        <label for="rowLimit">Row limit (1–500)</label>
-        <input id="rowLimit" type="number" min="1" max="500" value="50">
-
-        <label for="rowFilter">Client-side row filter (optional)</label>
-        <input id="rowFilter" type="text" placeholder="Filters displayed rows (does not query DB)">
-
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
             {% if t|lower not in HIDDEN_TABLES %}
@@ -237,11 +238,10 @@
 
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
-            {% if t not in HIDDEN_TABLES %}
-              <label class="dbx-item" data-table="{{ t|lower }}">
-                <input type="checkbox" class="tableCheckbox" value="{{ t }}">
-                <code>{{ t }}</code>
-              </label>
+            {% if t|lower not in HIDDEN_TABLES %}
+              <div class="dbx-item" data-table="{{ t }}">
+                <code class="dbx-tablelink">{{ t }}</code>
+              <div>
             {% endif %}
           {% endfor %}
         </div>
@@ -254,255 +254,78 @@
 </div>
 
 <script>
-  const tableSearch = document.getElementById("tableSearch");
   const tableList = document.getElementById("tableList");
-  const rowLimit = document.getElementById("rowLimit");
-  const rowFilter = document.getElementById("rowFilter");
-  const statusBox = document.getElementById("statusBox");
   const results = document.getElementById("results");
+  const statusBox = document.getElementById("statusBox");
+
+  const loadedTables = new Set();
+  const DEFAULT_LIMIT = 50;   // change if you want (or set to 500 etc.)
+
   function setStatus(msg) {
     statusBox.textContent = msg;
   }
 
-  function getSelectedTables() {
-    return Array.from(document.querySelectorAll(".tableCheckbox:checked"))
-      .map(cb => cb.value);
+  function removeTableCard(tableName) {
+    const el = results.querySelector(`[data-table-card="${tableName}"]`);
+    if (el) el.remove();
   }
 
-  function applyClientSideFilter() {
-    const term = (rowFilter.value || "").trim().toLowerCase();
-    const cards = results.querySelectorAll("[data-table-card]");
-    cards.forEach(card => {
-      const rows = card.querySelectorAll("tbody tr");
-      rows.forEach(tr => {
-        if (!term) {
-          tr.style.display = "";
-          return;
-        }
-        const text = tr.textContent.toLowerCase();
-        tr.style.display = text.includes(term) ? "" : "none";
-      });
-    });
+  function setActive(tableName, active) {
+    const item = tableList.querySelector(`.dbx-item[data-table="${CSS.escape(tableName)}"]`);
+    if (item) item.classList.toggle("active", active);
   }
 
-  function escapeText(s) {
-    if (s === null || s === undefined) return "";
-    return String(s);
-  }
+  async function loadTable(tableName) {
+    setStatus(`Loading ${tableName}…`);
 
-  function renderTableCard(tableName, payload) {
-    const card = document.createElement("div");
-    card.className = "dbx-card";
-    card.setAttribute("data-table-card", tableName);
-
-    const header = document.createElement("header");
-    const h3 = document.createElement("h3");
-    h3.textContent = tableName;
-
-    const meta = document.createElement("span");
-    meta.className = "dbx-pill";
-    meta.textContent = `${payload.count} rows (limit ${payload.limit})`;
-
-    header.appendChild(h3);
-    header.appendChild(meta);
-    card.appendChild(header);
-
-    if (!payload.columns || payload.columns.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "dbx-empty";
-      empty.textContent = "No columns returned.";
-      card.appendChild(empty);
-      return card;
-    }
-
-    const wrap = document.createElement("div");
-    wrap.className = "dbx-tablewrap";
-
-    const table = document.createElement("table");
-    table.className = "dbx-table";
-
-    const thead = document.createElement("thead");
-    const thr = document.createElement("tr");
-    payload.columns.forEach(col => {
-      const th = document.createElement("th");
-      th.textContent = col;
-      thr.appendChild(th);
-    });
-    thead.appendChild(thr);
-
-    const tbody = document.createElement("tbody");
-
-    if (!payload.rows || payload.rows.length === 0) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = payload.columns.length;
-      td.className = "dbx-empty";
-      td.textContent = "No rows returned.";
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-    } else {
-      payload.rows.forEach(r => {
-        const tr = document.createElement("tr");
-        payload.columns.forEach(col => {
-          const td = document.createElement("td");
-          td.textContent = escapeText(r[col]);
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-    }
-
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    wrap.appendChild(table);
-    card.appendChild(wrap);
-    return card;
-  }
-    const loadedTables = new Set();
-
-    async function fetchAndRenderTables(tables) {
-      const limit = rowLimit.value;
-
-      setStatus(`Loading ${tables.length} table(s)…`);
-
-      try {
-        const resp = await fetch("/dbexplorer/api/tables", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ tables, limit })
-        });
-
-        if (!resp.ok) {
-          setStatus(`Request failed: HTTP ${resp.status}`);
-          return;
-        }
-
-        const data = await resp.json();
-        const returned = Object.keys(data);
-
-        if (returned.length === 0) {
-          setStatus("No data returned.");
-          return;
-        }
-
-        returned.forEach(t => {
-          // If already present, replace it (useful when limit changes)
-          const existing = results.querySelector(`[data-table-card="${t}"]`);
-          if (existing) existing.remove();
-
-          results.appendChild(renderTableCard(t, data[t]));
-        });
-
-        setStatus(`Loaded: ${returned.join(", ")}`);
-        applyClientSideFilter();
-      } catch (e) {
-        setStatus("Error loading tables. Check server logs.");
-      }
-    }
-
-    function removeTableCard(tableName) {
-      const el = results.querySelector(`[data-table-card="${tableName}"]`);
-      if (el) el.remove();
-    }
-
-    function updateActiveStyle(tableName, isActive) {
-      const btn = tableList.querySelector(`button[data-table="${CSS.escape(tableName)}"]`);
-      if (btn) btn.classList.toggle("active", isActive);
-    }
-
-    // Click-to-toggle behavior
-    tableList.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-table]");
-      if (!btn) return;
-
-      const tableName = btn.getAttribute("data-table");
-
-      if (loadedTables.has(tableName)) {
-        loadedTables.delete(tableName);
-        removeTableCard(tableName);
-        updateActiveStyle(tableName, false);
-
-        if (loadedTables.size === 0) setStatus("Ready.");
-        else setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
-        return;
-      }
-
-      loadedTables.add(tableName);
-      updateActiveStyle(tableName, true);
-      await fetchAndRenderTables([tableName]);
+    const resp = await fetch("/dbexplorer/api/tables", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ tables: [tableName], limit: DEFAULT_LIMIT })
     });
 
-  async function loadSelected() {
-    const tables = getSelectedTables();
-    const limit = rowLimit.value;
-
-    if (tables.length === 0) {
-      setStatus("Please select at least one table.");
-      results.innerHTML = "";
+    if (!resp.ok) {
+      setStatus(`Request failed: HTTP ${resp.status}`);
       return;
     }
 
-    setStatus(`Loading ${tables.length} table(s)…`);
-    results.innerHTML = "";
-    loadBtn.disabled = true;
-
-    try {
-      const resp = await fetch("/dbexplorer/api/tables", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ tables, limit })
-      });
-
-      if (!resp.ok) {
-        setStatus(`Request failed: HTTP ${resp.status}`);
-        return;
-      }
-
-      const data = await resp.json();
-
-      const returnedTables = Object.keys(data);
-      if (returnedTables.length === 0) {
-        setStatus("No data returned (tables may not exist or are not allowed).");
-        return;
-      }
-
-      returnedTables.forEach(t => {
-        results.appendChild(renderTableCard(t, data[t]));
-      });
-
-      setStatus(`Loaded: ${returnedTables.join(", ")}`);
-      applyClientSideFilter();
-    } catch (e) {
-      setStatus("Error loading tables. Check server logs.");
-    } finally {
-      loadBtn.disabled = false;
+    const data = await resp.json();
+    if (!data[tableName]) {
+      setStatus(`No data returned for ${tableName}.`);
+      return;
     }
+
+    // Replace if already present (e.g. re-load)
+    removeTableCard(tableName);
+    results.appendChild(renderTableCard(tableName, data[tableName]));
+
+    setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
   }
 
-  // Events
-  loadBtn.addEventListener("click", loadSelected);
+  tableList.addEventListener("click", async (e) => {
+    // Only toggle when clicking the name (code element)
+    const code = e.target.closest(".dbx-tablelink");
+    if (!code) return;
 
-  selectAllBtn.addEventListener("click", () => {
-    document.querySelectorAll(".tableCheckbox").forEach(cb => cb.checked = true);
-    setStatus("All tables selected.");
+    const item = e.target.closest(".dbx-item[data-table]");
+    if (!item) return;
+
+    const tableName = item.getAttribute("data-table");
+
+    if (loadedTables.has(tableName)) {
+      loadedTables.delete(tableName);
+      removeTableCard(tableName);
+      setActive(tableName, false);
+
+      if (loadedTables.size === 0) setStatus("Ready.");
+      else setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
+      return;
+    }
+
+    loadedTables.add(tableName);
+    setActive(tableName, true);
+    await loadTable(tableName);
   });
 
-  clearBtn.addEventListener("click", () => {
-    document.querySelectorAll(".tableCheckbox").forEach(cb => cb.checked = false);
-    results.innerHTML = "";
-    setStatus("Cleared selection.");
-  });
-
-  tableSearch.addEventListener("input", () => {
-    const q = tableSearch.value.trim().toLowerCase();
-    const items = tableList.querySelectorAll("[data-table]");
-    items.forEach(el => {
-      const name = el.getAttribute("data-table") || "";
-      el.style.display = (!q || name.includes(q)) ? "" : "none";
-    });
-  });
-
-  rowFilter.addEventListener("input", applyClientSideFilter);
 </script>
 {% endblock %}
