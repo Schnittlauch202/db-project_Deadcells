@@ -223,11 +223,12 @@
           {% endfor %}
         </div>
 
-</div>
 
-    </div>
+      </div>
 
     <!-- Right: Results -->
+    <div class="dbx-results" id="results"></div>
+
   </div>
 </div>
 
@@ -251,6 +252,80 @@
   function setActive(tableName, active) {
     const item = tableList.querySelector(`.dbx-item[data-table="${CSS.escape(tableName)}"]`);
     if (item) item.classList.toggle("active", active);
+  }
+  function escapeText(s) {
+    if (s === null || s === undefined) return "";
+    return String(s);
+  }
+
+  function renderTableCard(tableName, payload) {
+    const card = document.createElement("div");
+    card.className = "dbx-card";
+    card.setAttribute("data-table-card", tableName);
+
+    const header = document.createElement("header");
+    const h3 = document.createElement("h3");
+    h3.textContent = tableName;
+
+    const meta = document.createElement("span");
+    meta.className = "dbx-pill";
+    meta.textContent = `${payload.count} rows (limit ${payload.limit})`;
+
+    header.appendChild(h3);
+    header.appendChild(meta);
+    card.appendChild(header);
+
+    if (!payload.columns || payload.columns.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "dbx-empty";
+      empty.textContent = "No columns returned.";
+      card.appendChild(empty);
+      return card;
+    }
+
+    const wrap = document.createElement("div");
+    wrap.className = "dbx-tablewrap";
+
+    const table = document.createElement("table");
+    table.className = "dbx-table";
+
+    const thead = document.createElement("thead");
+    const thr = document.createElement("tr");
+    payload.columns.forEach(col => {
+      const th = document.createElement("th");
+      th.textContent = col;
+      thr.appendChild(th);
+    });
+    thead.appendChild(thr);
+
+    const tbody = document.createElement("tbody");
+
+    if (!payload.rows || payload.rows.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = payload.columns.length;
+      td.className = "dbx-empty";
+      td.textContent = "No rows returned.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    } else {
+      payload.rows.forEach(r => {
+        const tr = document.createElement("tr");
+        payload.columns.forEach(col => {
+          const td = document.createElement("td");
+          td.textContent = escapeText(r[col]);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    card.appendChild(wrap);
+
+    return card;
   }
 
   async function loadTable(tableName) {
