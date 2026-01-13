@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% set HIDDEN_TABLES = ['Todo', 'users'] %}
 <style>
   .dbx-wrap {
     max-width: 1200px;
@@ -217,10 +218,12 @@
 
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
-            <label class="dbx-item" data-table="{{ t|lower }}">
-              <input type="checkbox" class="tableCheckbox" value="{{ t }}">
-              <code>{{ t }}</code>
-            </label>
+            {% if t not in HIDDEN_TABLES %}
+              <label class="dbx-item" data-table="{{ t|lower }}">
+                <input type="checkbox" class="tableCheckbox" value="{{ t }}">
+                <code>{{ t }}</code>
+              </label>
+            {% endif %}
           {% endfor %}
         </div>
       </div>
