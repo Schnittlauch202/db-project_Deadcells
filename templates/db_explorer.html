@@ -3,6 +3,18 @@
 {% block content %}
 {% set HIDDEN_TABLES = ['todos', 'users'] %}
 <style>
+  .dbx-item-btn{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+  }
+  .dbx-item-btn.active{
+    background: #f3f3f3;
+    outline: 2px solid #111;
+  }
+
   .dbx-wrap {
     max-width: 1200px;
     margin: 0 auto;
@@ -209,11 +221,18 @@
         <label for="rowFilter">Client-side row filter (optional)</label>
         <input id="rowFilter" type="text" placeholder="Filters displayed rows (does not query DB)">
 
-        <div class="dbx-btnrow">
-          <button class="dbx-btn" id="selectAllBtn" type="button">Select all</button>
-          <button class="dbx-btn" id="clearBtn" type="button">Clear</button>
-          <button class="dbx-btn primary" id="loadBtn" type="button">Load selected</button>
+        <div class="dbx-list" id="tableList">
+          {% for t in table_names %}
+            {% if t|lower not in HIDDEN_TABLES %}
+              <button class="dbx-item dbx-item-btn" type="button"
+                      data-table="{{ t }}" data-table-lower="{{ t|lower }}">
+                <code>{{ t }}</code>
+                <span class="dbx-pill" style="margin-left:auto;">click to toggle</span>
+              </button>
+            {% endif %}
+          {% endfor %}
         </div>
+
         <div class="dbx-status" id="statusBox">Ready.</div>
 
         <div class="dbx-list" id="tableList">
@@ -241,10 +260,6 @@
   const rowFilter = document.getElementById("rowFilter");
   const statusBox = document.getElementById("statusBox");
   const results = document.getElementById("results");
-  const loadBtn = document.getElementById("loadBtn");
-  const selectAllBtn = document.getElementById("selectAllBtn");
-  const clearBtn = document.getElementById("clearBtn");
-
   function setStatus(msg) {
     statusBox.textContent = msg;
   }
