@@ -202,19 +202,7 @@
       <div class="dbx-body">
         <label for="tableSearch">Search tables</label>
         <input id="tableSearch" type="text" placeholder="e.g. todos, users…" autocomplete="off">
-
-        <label for="rowLimit">Row limit (1–500)</label>
-        <input id="rowLimit" type="number" min="1" max="500" value="50">
-
-        <label for="rowFilter">Client-side row filter (optional)</label>
-        <input id="rowFilter" type="text" placeholder="Filters displayed rows (does not query DB)">
-
-        <div class="dbx-btnrow">
-          <button class="dbx-btn" id="selectAllBtn" type="button">Select all</button>
-          <button class="dbx-btn" id="clearBtn" type="button">Clear</button>
-          <button class="dbx-btn primary" id="loadBtn" type="button">Load selected</button>
-        </div>
-
+        
         <div class="dbx-status" id="statusBox">Ready.</div>
 
         <div class="dbx-list" id="tableList">
