@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% set HIDDEN_TABLES = ['Todo', 'users'] %}
+{% set HIDDEN_TABLES = ['TODOS', 'users'] %}
 <style>
   .dbx-wrap {
     max-width: 1200px;
@@ -202,7 +202,7 @@
       </header>
       <div class="dbx-body">
         <label for="tableSearch">Search tables</label>
-        <input id="tableSearch" type="text" placeholder="e.g. todos, users…" autocomplete="off">
+        <input id="tableSearch" type="text" placeholder="e.g. equip, Biomes…" autocomplete="off">
         <label for="rowLimit">Row limit (1–500)</label>
         <input id="rowLimit" type="number" min="1" max="500" value="50">
 
