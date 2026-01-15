@@ -102,12 +102,13 @@
   }
 
   .dbx-list {
-    margin-top: 12px;
-    border-top: 1px solid #eee;
-    padding-top: 12px;
-    max-height: 420px;
-    overflow: auto;
-  }
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  max-height: 420px;
+  overflow: auto;
+}
+
 
   .dbx-item {
     display: flex;
@@ -200,7 +201,6 @@
 
 <div class="dbx-wrap">
   <h1 style="margin:0 0 10px;">Deadcells fan wiki</h1>
-  <div class="dbx-small">Select one or more tables, set a row limit, then load.</div>
 
   <div class="dbx-grid" style="margin-top: 14px;">
     <!-- Left: Controls -->
@@ -230,14 +230,9 @@
 <script>
   const tableList = document.getElementById("tableList");
   const results = document.getElementById("results");
-  const statusBox = document.getElementById("statusBox");
-
   const loadedTables = new Set();
   const DEFAULT_LIMIT = 50;   // change if you want (or set to 500 etc.)
 
-  function setStatus(msg) {
-    statusBox.textContent = msg;
-  }
 
   function removeTableCard(tableName) {
     const el = results.querySelector(`[data-table-card="${tableName}"]`);
@@ -324,31 +319,21 @@
   }
 
   async function loadTable(tableName) {
-    setStatus(`Loading ${tableName}…`);
+  const resp = await fetch("/dbexplorer/api/tables", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ tables: [tableName], limit: DEFAULT_LIMIT })
+  });
 
-    const resp = await fetch("/dbexplorer/api/tables", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ tables: [tableName], limit: DEFAULT_LIMIT })
-    });
+  if (!resp.ok) return;
 
-    if (!resp.ok) {
-      setStatus(`Request failed: HTTP ${resp.status}`);
-      return;
-    }
+  const data = await resp.json();
+  if (!data[tableName]) return;
 
-    const data = await resp.json();
-    if (!data[tableName]) {
-      setStatus(`No data returned for ${tableName}.`);
-      return;
-    }
+  removeTableCard(tableName);
+  results.appendChild(renderTableCard(tableName, data[tableName]));
+}
 
-    // Replace if already present (e.g. re-load)
-    removeTableCard(tableName);
-    results.appendChild(renderTableCard(tableName, data[tableName]));
-
-    setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
-  }
 
   tableList.addEventListener("click", async (e) => {
     // Only toggle when clicking the name (code element)
@@ -365,9 +350,7 @@
       removeTableCard(tableName);
       setActive(tableName, false);
 
-      if (loadedTables.size === 0) setStatus("Ready.");
-      else setStatus(`Showing: ${Array.from(loadedTables).join(", ")}`);
-      return;
+      
     }
 
     loadedTables.add(tableName);
