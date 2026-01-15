@@ -336,27 +336,25 @@
 
 
   tableList.addEventListener("click", async (e) => {
-    // Only toggle when clicking the name (code element)
-    const code = e.target.closest(".dbx-tablelink");
-    if (!code) return;
+  const item = e.target.closest(".dbx-item[data-table]");
+  if (!item) return;
 
-    const item = e.target.closest(".dbx-item[data-table]");
-    if (!item) return;
+  const tableName = item.getAttribute("data-table");
 
-    const tableName = item.getAttribute("data-table");
+  // Toggle OFF
+  if (loadedTables.has(tableName)) {
+    loadedTables.delete(tableName);
+    removeTableCard(tableName);
+    item.classList.remove("active");
+    return;
+  }
 
-    if (loadedTables.has(tableName)) {
-      loadedTables.delete(tableName);
-      removeTableCard(tableName);
-      setActive(tableName, false);
+  // Toggle ON
+  loadedTables.add(tableName);
+  item.classList.add("active");
+  await loadTable(tableName);
+});
 
-      
-    }
-
-    loadedTables.add(tableName);
-    setActive(tableName, true);
-    await loadTable(tableName);
-  });
 
 </script>
 {% endblock %}
