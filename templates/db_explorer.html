@@ -13,23 +13,19 @@
     --shadow: 0 10px 30px rgba(0,0,0,0.25);
   }
 
-  body{
-  background-image:
-    linear-gradient(rgba(10, 10, 12, 0.70), rgba(10, 10, 12, 0.70)),
-    url("{{ url_for('static', filename='img/deadcells_bg.jpg') }}");
-
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  }
   .wiki-wrap{
-  max-width: 100%;
-  margin: 0;
-  padding: 18px 14px 30px;
+    background-image:
+      linear-gradient(rgba(10, 10, 12, 0.70), rgba(10, 10, 12, 0.70)),
+      url("{{ url_for('static', filename='img/deadcells_bg.jpg') }}");
+
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    min-height: 100vh;
+    padding: 18px 14px 30px;
   }
-
-
 
   .wiki-topbar,
   .wiki-box,
