@@ -199,18 +199,16 @@
 </style>
 
 <div class="dbx-wrap">
-  <h1 style="margin:0 0 10px;">DB Explorer</h1>
+  <h1 style="margin:0 0 10px;">Deadcells fan wiki</h1>
   <div class="dbx-small">Select one or more tables, set a row limit, then load.</div>
 
   <div class="dbx-grid" style="margin-top: 14px;">
     <!-- Left: Controls -->
     <div class="dbx-card dbx-controls">
       <header>
-        <h2>Controls</h2>
-        <span class="dbx-pill">{{ table_names|length }} tables</span>
+        <h2>Tables</h2>
       </header>
       <div class="dbx-body">
-        <div class="dbx-status" id="statusBox">Ready.</div>
         {% set HIDDEN_TABLES = ['todos', 'users'] %}
         <div class="dbx-list" id="tableList">
           {% for t in table_names %}
