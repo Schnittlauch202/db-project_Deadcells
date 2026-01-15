@@ -3,106 +3,91 @@
 {% set HIDDEN_TABLES = ['todos', 'users'] %}
 
 <style>
-  /* --- Wiki-ish layout tokens --- */
   :root{
-    --bg: #f4f5f7;
-    --panel: #ffffff;
-    --panel2: #fbfbfc;
-    --border: #d9dde3;
+    --bg: #0e0f14;
+    --panel: rgba(255,255,255,0.92);
+    --border: rgba(255,255,255,0.35);
     --text: #202122;
     --muted: #54595d;
-    --link: #3366cc;
-    --linkHover: #2a4b8d;
-    --accent: #c62828; /* Dead Cells-ish red accent */
-    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --link: #c62828;
+    --shadow: 0 10px 30px rgba(0,0,0,0.25);
   }
 
   .wiki-wrap{
-    background: var(--bg);
+    background-image:
+      linear-gradient(rgba(10, 10, 12, 0.70), rgba(10, 10, 12, 0.70)),
+      url("{{ url_for('static', filename='img/deadcells_bg.jpg') }}");
+
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    min-height: 100vh;
     padding: 18px 14px 30px;
   }
 
-  /* Top bar */
-  .wiki-topbar{
-    max-width: 1280px;
-    margin: 0 auto 14px;
+  .wiki-topbar,
+  .wiki-box,
+  .wiki-main,
+  .section{
     background: var(--panel);
+    backdrop-filter: blur(6px);
     border: 1px solid var(--border);
     border-radius: 10px;
     box-shadow: var(--shadow);
+  }
+
+  .wiki-topbar{
+    max-width: 1280px;
+    margin: 0 auto 14px;
     padding: 12px 14px;
     display: flex;
     align-items: center;
     gap: 14px;
   }
+
   .wiki-logo{
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #111);
+    background: linear-gradient(135deg, #c62828, #111);
   }
-  .wiki-brand{
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-  }
+
   .wiki-brand .title{
     font-weight: 800;
     font-size: 16px;
-    color: var(--text);
   }
+
   .wiki-brand .subtitle{
     font-size: 12px;
     color: var(--muted);
   }
-  .wiki-toplinks{
-    margin-left: auto;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    font-size: 13px;
-  }
-  .wiki-toplinks a{
-    color: var(--link);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .wiki-toplinks a:hover{ color: var(--linkHover); text-decoration: underline; }
 
-  /* 2-column page */
   .wiki-grid{
     max-width: 1280px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 14px;
-    align-items: start;
   }
 
-  /* Sidebar */
   .wiki-side{
     position: sticky;
     top: 14px;
   }
-  .wiki-box{
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
+
   .wiki-box-h{
     padding: 10px 12px;
-    background: var(--panel2);
+    background: rgba(255,255,255,0.6);
     border-bottom: 1px solid var(--border);
     font-weight: 800;
-    color: var(--text);
     font-size: 13px;
-    letter-spacing: .02em;
     text-transform: uppercase;
   }
+
   .wiki-box-b{
-    padding: 10px 10px 12px;
+    padding: 10px;
   }
 
   .table-list{
@@ -111,144 +96,113 @@
     gap: 6px;
     max-height: 70vh;
     overflow: auto;
-    padding-right: 4px;
   }
 
-  /* Table link rows */
   .table-item{
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    align-items: center;
     padding: 8px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: #fff;
     cursor: pointer;
+    background: #fff;
   }
+
   .table-item:hover{
-    border-color: #c6cbd3;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
+
   .table-item code{
+    color: #c62828;
     font-size: 12px;
-    color: var(--accent);
   }
-  .table-item .dot{
+
+  .table-item.active{
+    border-color: #c62828;
+    background: #fff2f2;
+  }
+
+  .dot{
     width: 8px;
     height: 8px;
     border-radius: 99px;
     background: #cfd3da;
-    flex: 0 0 auto;
   }
-  .table-item.active{
-    border-color: var(--accent);
-    background: #fff7f7;
-  }
-  .table-item.active .dot{ background: var(--accent); }
 
-  /* Main content */
-  .wiki-main{
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
+  .table-item.active .dot{
+    background: #c62828;
   }
+
   .wiki-main-head{
     padding: 16px 18px 10px;
     border-bottom: 1px solid var(--border);
-    background: #fff;
   }
-  .breadcrumb{
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .breadcrumb a{
-    color: var(--link);
-    text-decoration: none;
-  }
-  .breadcrumb a:hover{ text-decoration: underline; }
+
   .page-title{
     font-size: 34px;
     margin: 0;
-    color: var(--text);
-    letter-spacing: -0.02em;
   }
+
   .page-lead{
     margin-top: 6px;
-    color: var(--muted);
     font-size: 13px;
+    color: var(--muted);
   }
 
   .wiki-main-body{
     padding: 14px 18px 18px;
   }
 
-  /* Loaded table "sections" like wiki headings */
   .section{
     margin-top: 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
     overflow: hidden;
-    background: #fff;
   }
+
   .section-h{
     display: flex;
-    align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
     padding: 10px 12px;
-    background: var(--panel2);
+    background: rgba(255,255,255,0.6);
     border-bottom: 1px solid var(--border);
   }
+
   .section-h h3{
     margin: 0;
     font-size: 16px;
-    font-weight: 800;
-    color: var(--text);
   }
+
   .meta{
     font-size: 12px;
     color: var(--muted);
-    white-space: nowrap;
   }
 
-  /* Table styling more "wiki" */
   .tablewrap{
     overflow: auto;
   }
+
   table.wikitable{
     width: 100%;
     border-collapse: collapse;
     min-width: 720px;
     font-size: 13px;
   }
+
   table.wikitable th,
   table.wikitable td{
     border-bottom: 1px solid var(--border);
     padding: 8px 10px;
-    vertical-align: top;
     white-space: nowrap;
   }
+
   table.wikitable th{
-    position: sticky;
-    top: 0;
     background: #eaecf0;
-    color: #222;
     text-align: left;
     font-size: 12px;
-    text-transform: none;
-  }
-  table.wikitable tbody tr:nth-child(even) td{
-    background: #fcfcfd;
   }
 
-  .empty{
-    padding: 12px;
-    color: var(--muted);
-    font-size: 13px;
+  table.wikitable tbody tr:nth-child(even) td{
+    background: #fcfcfd;
   }
 
   @media (max-width: 980px){
@@ -258,22 +212,17 @@
 </style>
 
 <div class="wiki-wrap">
-  <!-- Top bar -->
+
   <div class="wiki-topbar">
-    <div class="wiki-logo" aria-hidden="true"></div>
+    <div class="wiki-logo"></div>
     <div class="wiki-brand">
       <div class="title">Deadcells fan wiki</div>
       <div class="subtitle">Database explorer</div>
     </div>
-    <div class="wiki-toplinks">
-      <!-- change/remove these as you like -->
-      <a href="/">Home</a>
-      <a href="/dbexplorer">DB Explorer</a>
-    </div>
   </div>
 
   <div class="wiki-grid">
-    <!-- Sidebar -->
+
     <aside class="wiki-side">
       <div class="wiki-box">
         <div class="wiki-box-h">Navigation</div>
@@ -283,7 +232,7 @@
               {% if t|lower not in HIDDEN_TABLES %}
                 <div class="table-item" data-table="{{ t }}">
                   <code>{{ t }}</code>
-                  <span class="dot" aria-hidden="true"></span>
+                  <span class="dot"></span>
                 </div>
               {% endif %}
             {% endfor %}
@@ -292,12 +241,8 @@
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="wiki-main">
       <div class="wiki-main-head">
-        <div class="breadcrumb">
-          <a href="/">Home</a> › DB Explorer
-        </div>
         <h1 class="page-title">Database Tables</h1>
         <div class="page-lead">
           Click a table name in the sidebar to toggle it on/off.
@@ -308,6 +253,7 @@
         <div id="results"></div>
       </div>
     </main>
+
   </div>
 </div>
 
@@ -346,14 +292,6 @@
     head.appendChild(meta);
     section.appendChild(head);
 
-    if (!payload.columns || payload.columns.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "No columns returned.";
-      section.appendChild(empty);
-      return section;
-    }
-
     const wrap = document.createElement("div");
     wrap.className = "tablewrap";
 
@@ -362,36 +300,28 @@
 
     const thead = document.createElement("thead");
     const thr = document.createElement("tr");
+
     payload.columns.forEach(col => {
       const th = document.createElement("th");
       th.textContent = col;
       thr.appendChild(th);
     });
+
     thead.appendChild(thr);
+    table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
 
-    if (!payload.rows || payload.rows.length === 0) {
+    payload.rows.forEach(r => {
       const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = payload.columns.length;
-      td.className = "empty";
-      td.textContent = "No rows returned.";
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-    } else {
-      payload.rows.forEach(r => {
-        const tr = document.createElement("tr");
-        payload.columns.forEach(col => {
-          const td = document.createElement("td");
-          td.textContent = escapeText(r[col]);
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
+      payload.columns.forEach(col => {
+        const td = document.createElement("td");
+        td.textContent = escapeText(r[col]);
+        tr.appendChild(td);
       });
-    }
+      tbody.appendChild(tr);
+    });
 
-    table.appendChild(thead);
     table.appendChild(tbody);
     wrap.appendChild(table);
     section.appendChild(wrap);
@@ -433,4 +363,5 @@
     await loadTable(tableName);
   });
 </script>
+
 {% endblock %}
