@@ -208,17 +208,13 @@
   }
 
   .tablewrap{
-    overflow-x: auto;
-    overflow-y: hidden;
-    width: 100%;
+    overflow: auto;
   }
 
-  
-
   table.wikitable{
-    width: max-content;     /* lets it grow wider than container */
-    min-width: 100%;        /* but never smaller than container */
+    width: 100%;
     border-collapse: collapse;
+    min-width: 720px;
     font-size: 13px;
   }
 
@@ -243,6 +239,40 @@
     .wiki-grid{ grid-template-columns: 1fr; }
     .wiki-side{ position: static; }
   }
+  /* 1) Never let the page become the horizontal scroller */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* 2) Make sure the main content area doesn't cause horizontal overflow */
+  .wiki-main,
+  .wiki-main-body,
+  #results,
+  .section {
+    overflow-x: hidden;
+  }
+
+  /* 3) The horizontal scrollbar should live HERE (per table) */
+  .tablewrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: 8px; /* keeps the bar from touching the border */
+  }
+
+  /* 4) Let the table be wider than its container so the wrapper scrolls */
+  table.wikitable {
+    width: max-content;  /* expands to fit columns */
+    min-width: 100%;     /* still fills container if small */
+  }
+
+  /* 5) Prevent wrapping so width grows (forces horizontal scroll when many cols) */
+  table.wikitable th,
+  table.wikitable td {
+    white-space: nowrap;
+  }
+
 </style>
 
 <div class="wiki-wrap">
