@@ -1,229 +1,313 @@
 {% extends "base.html" %}
-
 {% block content %}
 {% set HIDDEN_TABLES = ['todos', 'users'] %}
+
 <style>
-  .dbx-tablelink{
-    cursor: pointer;
-    user-select: none;
-  }
-  .dbx-item.active{
-    background: #f3f3f3;
-    outline: 2px solid #111;
+  /* --- Wiki-ish layout tokens --- */
+  :root{
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --panel2: #fbfbfc;
+    --border: #d9dde3;
+    --text: #202122;
+    --muted: #54595d;
+    --link: #3366cc;
+    --linkHover: #2a4b8d;
+    --accent: #c62828; /* Dead Cells-ish red accent */
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
-  .dbx-wrap {
-    max-width: 1200px;
+  .wiki-wrap{
+    background: var(--bg);
+    padding: 18px 14px 30px;
+  }
+
+  /* Top bar */
+  .wiki-topbar{
+    max-width: 1280px;
+    margin: 0 auto 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .wiki-logo{
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #111);
+  }
+  .wiki-brand{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .wiki-brand .title{
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+  }
+  .wiki-brand .subtitle{
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .wiki-toplinks{
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+  .wiki-toplinks a{
+    color: var(--link);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .wiki-toplinks a:hover{ color: var(--linkHover); text-decoration: underline; }
+
+  /* 2-column page */
+  .wiki-grid{
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 16px;
-  }
-
-  .dbx-grid {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 16px;
+    grid-template-columns: 280px 1fr;
+    gap: 14px;
     align-items: start;
   }
 
-  .dbx-card {
-    background: #fff;
-    border: 1px solid #e6e6e6;
+  /* Sidebar */
+  .wiki-side{
+    position: sticky;
+    top: 14px;
+  }
+  .wiki-box{
+    background: var(--panel);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .wiki-box-h{
+    padding: 10px 12px;
+    background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+    font-weight: 800;
+    color: var(--text);
+    font-size: 13px;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+  .wiki-box-b{
+    padding: 10px 10px 12px;
   }
 
-  .dbx-card header {
-    padding: 12px 14px;
-    border-bottom: 1px solid #eee;
+  .table-list{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 70vh;
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  /* Table link rows */
+  .table-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .table-item:hover{
+    border-color: #c6cbd3;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .table-item code{
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .table-item .dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    background: #cfd3da;
+    flex: 0 0 auto;
+  }
+  .table-item.active{
+    border-color: var(--accent);
+    background: #fff7f7;
+  }
+  .table-item.active .dot{ background: var(--accent); }
+
+  /* Main content */
+  .wiki-main{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .wiki-main-head{
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .breadcrumb{
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .breadcrumb a{
+    color: var(--link);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover{ text-decoration: underline; }
+  .page-title{
+    font-size: 34px;
+    margin: 0;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .page-lead{
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .wiki-main-body{
+    padding: 14px 18px 18px;
+  }
+
+  /* Loaded table "sections" like wiki headings */
+  .section{
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .section-h{
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--panel2);
+    border-bottom: 1px solid var(--border);
   }
-
-  .dbx-card header h2, .dbx-card header h3 {
+  .section-h h3{
     margin: 0;
     font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
   }
-
-  .dbx-card .dbx-body {
-    padding: 14px;
-  }
-
-  .dbx-controls label {
-    display: block;
+  .meta{
     font-size: 12px;
-    font-weight: 600;
-    margin: 10px 0 6px;
-    color: #333;
-  }
-
-  .dbx-controls input[type="text"],
-  .dbx-controls input[type="number"]{
-    width: 100%;
-    padding: 10px 10px;
-    border-radius: 8px;
-    border: 1px solid #d8d8d8;
-    outline: none;
-  }
-
-  .dbx-btnrow {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  }
-
-  .dbx-btn {
-    appearance: none;
-    border: 1px solid #d0d0d0;
-    background: #f7f7f7;
-    border-radius: 8px;
-    padding: 9px 10px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  .dbx-btn.primary {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-  }
-
-  .dbx-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .dbx-small {
-    font-size: 12px;
-    color: #666;
-  }
-
-  .dbx-list {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-  max-height: 420px;
-  overflow: auto;
-}
-
-
-  .dbx-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 6px;
-    border-radius: 8px;
-  }
-
-  .dbx-item:hover {
-    background: #fafafa;
-  }
-
-  .dbx-item code {
-    font-size: 12px;
-  }
-
-  .dbx-status {
-    margin-top: 12px;
-    padding: 10px 12px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    background: #fbfbfb;
-    font-size: 13px;
-  }
-
-  .dbx-results {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .dbx-tablewrap {
-    overflow: auto;
-    border-top: 1px solid #eee;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-  }
-
-  table.dbx-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 13px;
-    min-width: 600px;
-  }
-
-  table.dbx-table th, table.dbx-table td {
-    padding: 10px 10px;
-    border-bottom: 1px solid #eee;
-    vertical-align: top;
+    color: var(--muted);
     white-space: nowrap;
   }
 
-  table.dbx-table th {
+  /* Table styling more "wiki" */
+  .tablewrap{
+    overflow: auto;
+  }
+  table.wikitable{
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+    font-size: 13px;
+  }
+  table.wikitable th,
+  table.wikitable td{
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  table.wikitable th{
     position: sticky;
     top: 0;
-    background: #f6f6f6;
-    z-index: 1;
+    background: #eaecf0;
+    color: #222;
     text-align: left;
     font-size: 12px;
-    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+  table.wikitable tbody tr:nth-child(even) td{
+    background: #fcfcfd;
   }
 
-  table.dbx-table tbody tr:nth-child(even) td {
-    background: #fcfcfc;
-  }
-
-  .dbx-pill {
-    font-size: 12px;
-    border: 1px solid #e5e5e5;
-    border-radius: 999px;
-    padding: 4px 8px;
-    background: #fafafa;
-    color: #444;
-  }
-
-  .dbx-empty {
-    padding: 12px 14px;
-    color: #666;
+  .empty{
+    padding: 12px;
+    color: var(--muted);
     font-size: 13px;
   }
 
-  @media (max-width: 980px) {
-    .dbx-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 980px){
+    .wiki-grid{ grid-template-columns: 1fr; }
+    .wiki-side{ position: static; }
   }
 </style>
 
-<div class="dbx-wrap">
-  <h1 style="margin:0 0 10px;">Deadcells fan wiki</h1>
+<div class="wiki-wrap">
+  <!-- Top bar -->
+  <div class="wiki-topbar">
+    <div class="wiki-logo" aria-hidden="true"></div>
+    <div class="wiki-brand">
+      <div class="title">Deadcells fan wiki</div>
+      <div class="subtitle">Database explorer</div>
+    </div>
+    <div class="wiki-toplinks">
+      <!-- change/remove these as you like -->
+      <a href="/">Home</a>
+      <a href="/dbexplorer">DB Explorer</a>
+    </div>
+  </div>
 
-  <div class="dbx-grid" style="margin-top: 14px;">
-    <!-- Left: Controls -->
-    <div class="dbx-card dbx-controls">
-      <header>
-        <h2>Tables</h2>
-      </header>
-      <div class="dbx-body">
-        {% set HIDDEN_TABLES = ['todos', 'users'] %}
-        <div class="dbx-list" id="tableList">
-          {% for t in table_names %}
-            {% if t|lower not in HIDDEN_TABLES %}
-              <div class="dbx-item" data-table="{{ t }}">
-                <code class="dbx-tablelink">{{ t }}</code>
-              </div>
-            {% endif %}
-          {% endfor %}
+  <div class="wiki-grid">
+    <!-- Sidebar -->
+    <aside class="wiki-side">
+      <div class="wiki-box">
+        <div class="wiki-box-h">Navigation</div>
+        <div class="wiki-box-b">
+          <div class="table-list" id="tableList">
+            {% for t in table_names %}
+              {% if t|lower not in HIDDEN_TABLES %}
+                <div class="table-item" data-table="{{ t }}">
+                  <code>{{ t }}</code>
+                  <span class="dot" aria-hidden="true"></span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Right: Results -->
-    <div class="dbx-results" id="results"></div>
+    <!-- Main -->
+    <main class="wiki-main">
+      <div class="wiki-main-head">
+        <div class="breadcrumb">
+          <a href="/">Home</a> › DB Explorer
+        </div>
+        <h1 class="page-title">Database Tables</h1>
+        <div class="page-lead">
+          Click a table name in the sidebar to toggle it on/off.
+        </div>
+      </div>
+
+      <div class="wiki-main-body">
+        <div id="results"></div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -231,53 +315,50 @@
   const tableList = document.getElementById("tableList");
   const results = document.getElementById("results");
   const loadedTables = new Set();
-  const DEFAULT_LIMIT = 50;   // change if you want (or set to 500 etc.)
+  const DEFAULT_LIMIT = 50;
 
+  function escapeText(s) {
+    if (s === null || s === undefined) return "";
+    return String(s);
+  }
 
   function removeTableCard(tableName) {
     const el = results.querySelector(`[data-table-card="${tableName}"]`);
     if (el) el.remove();
   }
 
-  function setActive(tableName, active) {
-    const item = tableList.querySelector(`.dbx-item[data-table="${CSS.escape(tableName)}"]`);
-    if (item) item.classList.toggle("active", active);
-  }
-  function escapeText(s) {
-    if (s === null || s === undefined) return "";
-    return String(s);
-  }
-
   function renderTableCard(tableName, payload) {
-    const card = document.createElement("div");
-    card.className = "dbx-card";
-    card.setAttribute("data-table-card", tableName);
+    const section = document.createElement("section");
+    section.className = "section";
+    section.setAttribute("data-table-card", tableName);
 
-    const header = document.createElement("header");
+    const head = document.createElement("div");
+    head.className = "section-h";
+
     const h3 = document.createElement("h3");
     h3.textContent = tableName;
 
-    const meta = document.createElement("span");
-    meta.className = "dbx-pill";
-    meta.textContent = `${payload.count} rows (limit ${payload.limit})`;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${payload.count} rows`;
 
-    header.appendChild(h3);
-    header.appendChild(meta);
-    card.appendChild(header);
+    head.appendChild(h3);
+    head.appendChild(meta);
+    section.appendChild(head);
 
     if (!payload.columns || payload.columns.length === 0) {
       const empty = document.createElement("div");
-      empty.className = "dbx-empty";
+      empty.className = "empty";
       empty.textContent = "No columns returned.";
-      card.appendChild(empty);
-      return card;
+      section.appendChild(empty);
+      return section;
     }
 
     const wrap = document.createElement("div");
-    wrap.className = "dbx-tablewrap";
+    wrap.className = "tablewrap";
 
     const table = document.createElement("table");
-    table.className = "dbx-table";
+    table.className = "wikitable";
 
     const thead = document.createElement("thead");
     const thr = document.createElement("tr");
@@ -294,7 +375,7 @@
       const tr = document.createElement("tr");
       const td = document.createElement("td");
       td.colSpan = payload.columns.length;
-      td.className = "dbx-empty";
+      td.className = "empty";
       td.textContent = "No rows returned.";
       tr.appendChild(td);
       tbody.appendChild(tr);
@@ -313,48 +394,43 @@
     table.appendChild(thead);
     table.appendChild(tbody);
     wrap.appendChild(table);
-    card.appendChild(wrap);
+    section.appendChild(wrap);
 
-    return card;
+    return section;
   }
 
   async function loadTable(tableName) {
-  const resp = await fetch("/dbexplorer/api/tables", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ tables: [tableName], limit: DEFAULT_LIMIT })
-  });
+    const resp = await fetch("/dbexplorer/api/tables", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ tables: [tableName], limit: DEFAULT_LIMIT })
+    });
 
-  if (!resp.ok) return;
+    if (!resp.ok) return;
 
-  const data = await resp.json();
-  if (!data[tableName]) return;
+    const data = await resp.json();
+    if (!data[tableName]) return;
 
-  removeTableCard(tableName);
-  results.appendChild(renderTableCard(tableName, data[tableName]));
-}
-
-
-  tableList.addEventListener("click", async (e) => {
-  const item = e.target.closest(".dbx-item[data-table]");
-  if (!item) return;
-
-  const tableName = item.getAttribute("data-table");
-
-  // Toggle OFF
-  if (loadedTables.has(tableName)) {
-    loadedTables.delete(tableName);
     removeTableCard(tableName);
-    item.classList.remove("active");
-    return;
+    results.appendChild(renderTableCard(tableName, data[tableName]));
   }
 
-  // Toggle ON
-  loadedTables.add(tableName);
-  item.classList.add("active");
-  await loadTable(tableName);
-});
+  tableList.addEventListener("click", async (e) => {
+    const item = e.target.closest(".table-item[data-table]");
+    if (!item) return;
 
+    const tableName = item.getAttribute("data-table");
 
+    if (loadedTables.has(tableName)) {
+      loadedTables.delete(tableName);
+      removeTableCard(tableName);
+      item.classList.remove("active");
+      return;
+    }
+
+    loadedTables.add(tableName);
+    item.classList.add("active");
+    await loadTable(tableName);
+  });
 </script>
 {% endblock %}
