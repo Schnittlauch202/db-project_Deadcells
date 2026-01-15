@@ -208,13 +208,17 @@
   }
 
   .tablewrap{
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
   }
 
+  
+
   table.wikitable{
-    width: 100%;
+    width: max-content;     /* lets it grow wider than container */
+    min-width: 100%;        /* but never smaller than container */
     border-collapse: collapse;
-    min-width: 720px;
     font-size: 13px;
   }
 
