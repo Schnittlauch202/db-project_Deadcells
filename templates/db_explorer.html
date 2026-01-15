@@ -11,6 +11,22 @@
     --shadow: 0 10px 30px rgba(0,0,0,0.25);
     --accent: #c62828;
   }
+  .wiki-input{
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.9);
+    outline: none;
+    font-size: 13px;
+  }
+  .wiki-input:focus{
+    border-color: rgba(198,40,40,0.9);
+    box-shadow: 0 0 0 3px rgba(198,40,40,0.12);
+  }
+
 
   /* FULL BACKGROUND IMAGE (replaces gray) */
   body{
@@ -241,6 +257,7 @@
       <div class="wiki-box">
         <div class="wiki-box-h">Navigation</div>
         <div class="wiki-box-b">
+          <input id="tableSearch" class="wiki-input" type="text" placeholder="Search tables…" autocomplete="off">
           <div class="table-list" id="tableList">
             {% for t in table_names %}
               {% if t|lower not in HIDDEN_TABLES %}
@@ -259,6 +276,8 @@
       <div class="wiki-main-head">
         <h1 class="page-title">Database Tables</h1>
         <div class="page-lead">
+          <input id="attrSearch" class="wiki-input" type="text"
+                placeholder="Search within loaded tables (any column)…" autocomplete="off">
           Click a table name in the sidebar to toggle it on/off.
         </div>
       </div>
@@ -276,6 +295,9 @@
   const results = document.getElementById("results");
   const loadedTables = new Set();
   const DEFAULT_LIMIT = 50;
+  const tableSearch = document.getElementById("tableSearch");
+  const attrSearch = document.getElementById("attrSearch");
+
 
   function escapeText(s) {
     if (s === null || s === undefined) return "";
@@ -343,6 +365,31 @@
     return section;
   }
 
+  function applyTableSearch() {
+    const q = (tableSearch?.value || "").trim().toLowerCase();
+    const items = tableList.querySelectorAll(".table-item[data-table]");
+    items.forEach(item => {
+      const name = (item.getAttribute("data-table") || "").toLowerCase();
+      item.style.display = (!q || name.includes(q)) ? "" : "none";
+    });
+  }
+
+  function applyAttributeSearch() {
+    const q = (attrSearch?.value || "").trim().toLowerCase();
+    const sections = results.querySelectorAll(".section[data-table-card]");
+
+    sections.forEach(section => {
+      const rows = section.querySelectorAll("tbody tr");
+      rows.forEach(tr => {
+        if (!q) {
+          tr.style.display = "";
+          return;
+        }
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+      });
+    });
+  }
+
   async function loadTable(tableName) {
     const resp = await fetch("/dbexplorer/api/tables", {
       method: "POST",
@@ -357,6 +404,8 @@
 
     removeTableCard(tableName);
     results.appendChild(renderTableCard(tableName, data[tableName]));
+    applyAttributeSearch();
+
   }
 
   tableList.addEventListener("click", async (e) => {
@@ -375,6 +424,10 @@
     loadedTables.add(tableName);
     item.classList.add("active");
     await loadTable(tableName);
+    if (tableSearch) tableSearch.addEventListener("input", applyTableSearch);
+    if (attrSearch) attrSearch.addEventListener("input", applyAttributeSearch);
+
+
   });
 </script>
 
