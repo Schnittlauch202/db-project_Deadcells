@@ -14,15 +14,18 @@
 
   /* FULL BACKGROUND IMAGE (replaces gray) */
   body{
-  background-image:
-    linear-gradient(rgba(10, 10, 12, 0.65), rgba(10, 10, 12, 0.65)),
-    url("{{ url_for('static', filename='deadcells_bg.jpg') }}");
+    background-image:
+      linear-gradient(rgba(10, 10, 12, 0.65), rgba(10, 10, 12, 0.65)),
+      url("{{ url_for('static', filename='deadcells_bg.jpg') }}");
 
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #0e0f14; /* fallback */
   }
+
+
 
 
   /* MAIN WRAPPER */
